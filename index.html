@@ -801,27 +801,49 @@
         </h2>
 
         <p>
-            Accès réservé à L'Atelier de Noël 3D.
+            Connectez-vous pour accéder
+            au tableau de bord.
         </p>
+
+
+        <!-- EMAIL ADMIN -->
+
+        <input
+            id="admin-email"
+            type="email"
+            placeholder="Adresse e-mail"
+            autocomplete="email"
+            required>
+
+
+        <!-- MOT DE PASSE SUPABASE -->
 
         <input
             id="admin-password"
             type="password"
-            placeholder="Mot de passe">
+            placeholder="Mot de passe"
+            autocomplete="current-password"
+            required>
+
+
+        <!-- CONNEXION -->
 
         <button
             class="btn primary full"
             onclick="adminLogin()">
 
-            Entrer
+            🔐 Se connecter
 
         </button>
+
+
+        <!-- ERREUR -->
 
         <div
             id="admin-login-error"
             class="message error hidden">
 
-            Mot de passe incorrect.
+            Email ou mot de passe incorrect.
 
         </div>
 
