@@ -787,8 +787,11 @@
      ADMIN LOGIN
 ========================================================= -->
 
-<section id="admin-login"
-         class="page">
+<!-- =========================================================
+     CONNEXION ADMINISTRATEUR
+========================================================= -->
+
+<section id="admin-login" class="page">
 
     <div class="admin-login-card">
 
@@ -801,50 +804,42 @@
         </h2>
 
         <p>
-            Connectez-vous pour accéder
-            au tableau de bord.
+            Connectez-vous pour accéder au tableau de bord.
         </p>
 
-
-        <!-- EMAIL ADMIN -->
-
+        <!-- Adresse e-mail -->
         <input
             id="admin-email"
             type="email"
             placeholder="Adresse e-mail"
             autocomplete="email"
-            required>
+            required
+        >
 
-
-        <!-- MOT DE PASSE SUPABASE -->
-
+        <!-- Mot de passe -->
         <input
             id="admin-password"
             type="password"
             placeholder="Mot de passe"
             autocomplete="current-password"
-            required>
+            required
+        >
 
-
-        <!-- CONNEXION -->
-
+        <!-- Bouton -->
         <button
+            type="button"
             class="btn primary full"
-            onclick="adminLogin()">
-
+            onclick="adminLogin()"
+        >
             🔐 Se connecter
-
         </button>
 
-
-        <!-- ERREUR -->
-
+        <!-- Message d'erreur -->
         <div
             id="admin-login-error"
-            class="message error hidden">
-
+            class="message error hidden"
+        >
             Email ou mot de passe incorrect.
-
         </div>
 
     </div>
