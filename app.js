@@ -90,53 +90,120 @@ function showPage(pageId) {
 }
 
 
-/* ============================================================
-   3. OUVRIR UNE PAGE ADMIN APRÈS VÉRIFICATION
+//* ============================================================
+   OUVRIR L'ESPACE ADMIN APRÈS CONNEXION
 ============================================================ */
 
 async function checkAdminAndOpen() {
 
-    const {
-        data,
-        error
-    } = await db.auth.getUser();
+    try {
+
+        const {
+            data,
+            error
+        } = await db.auth.getUser();
 
 
-    if (
-        error ||
-        !data ||
-        !data.user
-    ) {
+        /* Pas connecté */
 
-        showPage("admin-login");
+        if (
+            error ||
+            !data ||
+            !data.user
+        ) {
 
-        return;
+            showPage("admin-login");
+
+            return false;
+
+        }
+
+
+        /* ====================================================
+           UTILISATEUR CONNECTÉ
+        ==================================================== */
+
+
+        /*
+            On cache TOUTES les pages.
+            Cela évite que admin-login reste affichée.
+        */
+
+        document
+            .querySelectorAll(".page")
+            .forEach(page => {
+
+                page.classList.remove("active");
+
+            });
+
+
+        /*
+            On récupère la page admin.
+        */
+
+        const adminPage =
+            document.getElementById("admin");
+
+
+        if (!adminPage) {
+
+            console.error(
+                "ERREUR : la section #admin est introuvable dans index.html"
+            );
+
+            alert(
+                "Erreur : la page d'administration est introuvable dans le HTML."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+            On affiche l'administration.
+        */
+
+        adminPage.classList.add("active");
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+        /*
+            On charge les commandes.
+        */
+
+        await loadOrders();
+
+
+        return true;
 
     }
 
 
-    /*
-        L'utilisateur est connecté.
+    catch(error) {
 
-        La RLS Supabase vérifiera ensuite
-        si son UID est bien celui de l'admin.
-    */
-
-    document
-        .getElementById("admin")
-        .classList.add("active");
+        console.error(
+            "Erreur ouverture administration :",
+            error
+        );
 
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+        alert(
+            "La connexion fonctionne, mais l'espace administrateur n'a pas pu être chargé."
+        );
 
 
-    await loadOrders();
+        return false;
+
+    }
 
 }
-
 
 /* ============================================================
    4. CHOIX D'UN MODÈLE
