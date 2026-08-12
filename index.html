@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>L'Atelier de Noël 3D</title>
+
+    <meta name="description"
+          content="Boules de Noël personnalisées imprimées en 3D à Saint-Witz et alentours.">
+
+    <!-- Google Font -->
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="style.css">
+
+</head>
+
+
+<body>
+
+<!-- =========================================================
+     FLOCONS
+========================================================= -->
+
+<div id="snow-container"></div>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="header">
+
+    <div class="logo"
+         onclick="showPage('home')">
+
+        🎄
+
+        <span>
+            L'Atelier de Noël 3D
+        </span>
+
+    </div>
+
+
+    <nav>
+
+        <button onclick="showPage('home')">
+            Accueil
+        </button>
+
+        <button onclick="showPage('catalog')">
+            Catalogue
+        </button>
+
+        <button onclick="showPage('order')">
+            Commander
+        </button>
+
+        <button onclick="showPage('tracking')">
+            Suivre ma commande
+        </button>
+
+        <button
+            class="admin-button"
+            onclick="showPage('admin-login')">
+
+            🔐
+
+        </button>
+
+    </nav>
+
+</header>
+
+
+<main>
+
+
+<!-- =========================================================
+     ACCUEIL
+========================================================= -->
+
+<section id="home"
+         class="page active">
+
+    <div class="hero">
+
+        <div class="hero-content">
+
+            <div class="badge">
+                ✨ Créations imprimées en 3D
+            </div>
+
+            <h1>
+                Votre Noël,
+                <span>vraiment personnalisé.</span>
+            </h1>
+
+            <p>
+                Découvrez nos boules de Noël personnalisées,
+                fabriquées en impression 3D à Saint-Witz
+                et dans les alentours.
+            </p>
+
+            <div class="hero-buttons">
+
+                <button
+                    class="btn primary"
+                    onclick="showPage('catalog')">
+
+                    Découvrir les modèles 🎄
+
+                </button>
+
+                <button
+                    class="btn secondary"
+                    onclick="showPage('tracking')">
+
+                    Suivre ma commande
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-decoration">
+
+            <div class="christmas-ball">
+
+                <span>SW</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="advantages">
+
+        <div>
+            <strong>🖨️</strong>
+            <span>Imprimé en 3D</span>
+        </div>
+
+        <div>
+            <strong>✨</strong>
+            <span>Personnalisable</span>
+        </div>
+
+        <div>
+            <strong>📍</strong>
+            <span>Saint-Witz & alentours</span>
+        </div>
+
+        <div>
+            <strong>🎁</strong>
+            <span>Créé pour vous</span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CATALOGUE
+========================================================= -->
+
+<section id="catalog"
+         class="page">
+
+    <div class="section-header">
+
+        <div class="badge">
+            🎄 Nos créations
+        </div>
+
+        <h2>
+            Le catalogue
+        </h2>
+
+        <p>
+            Choisissez votre style de boule de Noël.
+        </p>
+
+    </div>
+
+
+    <div class="products-grid">
+
+
+        <article class="product-card">
+
+            <div class="product-icon">
+                🦌
+            </div>
+
+            <div class="product-content">
+
+                <span class="product-tag">
+                    1 couleur
+                </span>
+
+                <h3>
+                    Modèle Simple
+                </h3>
+
+                <p>
+                    Rennes, sapins, bonhommes de neige
+                    et autres décorations classiques.
+                </p>
+
+                <button
+                    class="btn small"
+                    onclick="selectModel('Modèle Simple - 1 couleur')">
+
+                    Choisir
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <article class="product-card">
+
+            <div class="product-icon">
+                🎄
+            </div>
+
+            <div class="product-content">
+
+                <span class="product-tag">
+                    2 couleurs
+                </span>
+
+                <h3>
+                    Modèle Simple
+                </h3>
+
+                <p>
+                    Une décoration classique avec
+                    une combinaison de deux couleurs.
+                </p>
+
+                <button
+                    class="btn small"
+                    onclick="selectModel('Modèle Simple - 2 couleurs')">
+
+                    Choisir
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <article class="product-card featured">
+
+            <div class="product-icon">
+                ✨
+            </div>
+
+            <div class="product-content">
+
+                <span class="product-tag gold">
+                    Personnalisable
+                </span>
+
+                <h3>
+                    Prénom + Année
+                </h3>
+
+                <p>
+                    Ajoutez un prénom et l'année
+                    pour créer une boule unique.
+                </p>
+
+                <button
+                    class="btn small"
+                    onclick="selectModel('Modèle Personnalisable - 1 couleur')">
+
+                    Choisir
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <article class="product-card">
+
+            <div class="product-icon">
+                🎨
+            </div>
+
+            <div class="product-content">
+
+                <span class="product-tag">
+                    2 couleurs
+                </span>
+
+                <h3>
+                    Personnalisable
+                </h3>
+
+                <p>
+                    Prénom + année avec deux couleurs
+                    pour un résultat encore plus original.
+                </p>
+
+                <button
+                    class="btn small"
+                    onclick="selectModel('Modèle Personnalisable - 2 couleurs')">
+
+                    Choisir
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <article class="product-card special">
+
+            <div class="product-icon">
+                👶🐾
+            </div>
+
+            <div class="product-content">
+
+                <span class="product-tag special-tag">
+                    ⭐ SPÉCIAL
+                </span>
+
+                <h3>
+                    Mon 1er Noël
+                </h3>
+
+                <p>
+                    Pour bébé ou votre animal,
+                    immortalisez son premier Noël.
+                </p>
+
+                <button
+                    class="btn small"
+                    onclick="selectModel('Mon 1er Noël')">
+
+                    Choisir
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     COMMANDE
+========================================================= -->
+
+<section id="order"
+         class="page">
+
+    <div class="section-header">
+
+        <div class="badge">
+            🎁 Votre commande
+        </div>
+
+        <h2>
+            Personnalisez votre boule
+        </h2>
+
+        <p>
+            Remplissez le formulaire ci-dessous.
+        </p>
+
+    </div>
+
+
+    <div class="form-card">
+
+        <form id="order-form">
+
+
+            <h3>
+                👤 Vos informations
+            </h3>
+
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label>
+                        Prénom *
+                    </label>
+
+                    <input
+                        id="first-name"
+                        required
+                        autocomplete="given-name">
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Nom *
+                    </label>
+
+                    <input
+                        id="last-name"
+                        required
+                        autocomplete="family-name">
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    E-mail *
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    required
+                    autocomplete="email">
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Téléphone
+                </label>
+
+                <input
+                    id="phone"
+                    type="tel"
+                    autocomplete="tel">
+
+            </div>
+
+
+            <h3>
+                📍 Adresse
+            </h3>
+
+
+            <div class="field">
+
+                <label>
+                    Rue *
+                </label>
+
+                <input
+                    id="street"
+                    required
+                    autocomplete="street-address">
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label>
+                        Ville *
+                    </label>
+
+                    <input
+                        id="city"
+                        value="Saint-Witz"
+                        required>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Complément
+                    </label>
+
+                    <input
+                        id="complement"
+                        placeholder="Appartement, bâtiment...">
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                🎄 Votre décoration
+            </h3>
+
+
+            <div class="field">
+
+                <label>
+                    Modèle *
+                </label>
+
+                <select id="model"
+                        required>
+
+                    <option value="">
+                        Sélectionnez un modèle
+                    </option>
+
+                    <option>
+                        Modèle Simple - 1 couleur
+                    </option>
+
+                    <option>
+                        Modèle Simple - 2 couleurs
+                    </option>
+
+                    <option>
+                        Modèle Personnalisable - 1 couleur
+                    </option>
+
+                    <option>
+                        Modèle Personnalisable - 2 couleurs
+                    </option>
+
+                    <option>
+                        Mon 1er Noël
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Prénom à écrire sur la boule
+                </label>
+
+                <input
+                    id="personalization"
+                    placeholder="Ex : Emma">
+
+            </div>
+
+
+            <label class="checkbox">
+
+                <input
+                    id="specific-color"
+                    type="checkbox">
+
+                <span>
+                    Demande de couleur spécifique
+                    <small>
+                        (supplément)
+                    </small>
+                </span>
+
+            </label>
+
+
+            <div class="payment-info">
+
+                💶
+
+                <div>
+
+                    <strong>
+                        Paiement en espèces
+                    </strong>
+
+                    <p>
+                        Nous passerons chez vous pour
+                        valider le modèle et récupérer
+                        le paiement.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn primary full">
+
+                🎄 Valider la commande
+
+            </button>
+
+
+            <div
+                id="order-error"
+                class="message error hidden">
+            </div>
+
+
+        </form>
+
+
+        <!-- SUCCÈS -->
+
+        <div
+            id="order-success"
+            class="success-screen hidden">
+
+            <div class="success-icon">
+                🎄
+            </div>
+
+            <h2>
+                Commande reçue !
+            </h2>
+
+            <p>
+                Votre numéro de commande est :
+            </p>
+
+            <strong
+                id="success-number"
+                class="order-number">
+            </strong>
+
+            <div class="status-box pending">
+
+                🔴
+
+                <div>
+
+                    <strong>
+                        En attente de passage
+                    </strong>
+
+                    <p>
+                        Paiement en espèces
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button
+                class="btn secondary"
+                onclick="showPage('tracking')">
+
+                Suivre ma commande
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SUIVI
+========================================================= -->
+
+<section id="tracking"
+         class="page">
+
+    <div class="section-header">
+
+        <div class="badge">
+            🔎 Suivi
+        </div>
+
+        <h2>
+            Où en est ma commande ?
+        </h2>
+
+        <p>
+            Entrez votre numéro de commande.
+        </p>
+
+    </div>
+
+
+    <div class="tracking-card">
+
+        <div class="tracking-search">
+
+            <input
+                id="tracking-number"
+                placeholder="Ex : #SW-042"
+                maxlength="20">
+
+            <button
+                class="btn primary"
+                onclick="trackOrder()">
+
+                Rechercher
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="tracking-loading"
+            class="hidden">
+
+            Recherche...
+
+        </div>
+
+
+        <div
+            id="tracking-result"
+            class="hidden">
+
+            <div
+                id="tracking-icon"
+                class="tracking-big-icon">
+            </div>
+
+            <h2 id="tracking-title">
+            </h2>
+
+            <p id="tracking-description">
+            </p>
+
+            <strong
+                id="tracking-order-number">
+            </strong>
+
+        </div>
+
+
+        <div
+            id="tracking-error"
+            class="message error hidden">
+
+            Commande introuvable.
+            Vérifiez votre numéro.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADMIN LOGIN
+========================================================= -->
+
+<section id="admin-login"
+         class="page">
+
+    <div class="admin-login-card">
+
+        <div class="admin-lock">
+            🔐
+        </div>
+
+        <h2>
+            Administration
+        </h2>
+
+        <p>
+            Accès réservé à L'Atelier de Noël 3D.
+        </p>
+
+        <input
+            id="admin-password"
+            type="password"
+            placeholder="Mot de passe">
+
+        <button
+            class="btn primary full"
+            onclick="adminLogin()">
+
+            Entrer
+
+        </button>
+
+        <div
+            id="admin-login-error"
+            class="message error hidden">
+
+            Mot de passe incorrect.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADMIN
+========================================================= -->
+
+<section id="admin"
+         class="page">
+
+    <div class="admin-header">
+
+        <div>
+
+            <div class="badge">
+                🔐 Administration
+            </div>
+
+            <h2>
+                Tableau de bord
+            </h2>
+
+        </div>
+
+        <button
+            class="btn secondary"
+            onclick="logoutAdmin()">
+
+            Déconnexion
+
+        </button>
+
+    </div>
+
+
+    <div class="admin-actions">
+
+        <button
+            class="btn primary"
+            onclick="openManualOrder()">
+
+            ➕ Créer une commande manuelle
+
+        </button>
+
+        <button
+            class="btn secondary"
+            onclick="loadOrders()">
+
+            🔄 Actualiser
+
+        </button>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <span>
+                📦
+            </span>
+
+            <strong id="stat-total">
+                0
+            </strong>
+
+            <small>
+                Commandes
+            </small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                🔴
+            </span>
+
+            <strong id="stat-pending">
+                0
+            </strong>
+
+            <small>
+                En attente
+            </small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                🟡
+            </span>
+
+            <strong id="stat-production">
+                0
+            </strong>
+
+            <small>
+                Fabrication
+            </small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span>
+                🟢
+            </span>
+
+            <strong id="stat-ready">
+                0
+            </strong>
+
+            <small>
+                Prêtes
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="orders-container">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            N°
+                        </th>
+
+                        <th>
+                            Client
+                        </th>
+
+                        <th>
+                            Adresse
+                        </th>
+
+                        <th>
+                            Modèle
+                        </th>
+
+                        <th>
+                            Personnalisation
+                        </th>
+
+                        <th>
+                            Couleur
+                        </th>
+
+                        <th>
+                            Statut
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="orders-table">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MODALE COMMANDE MANUELLE
+========================================================= -->
+
+<div
+    id="manual-modal"
+    class="modal hidden">
+
+    <div class="modal-content">
+
+        <button
+            class="modal-close"
+            onclick="closeManualOrder()">
+
+            ×
+
+        </button>
+
+        <h2>
+            ➕ Commande manuelle
+        </h2>
+
+        <form id="manual-form">
+
+            <input
+                id="manual-first-name"
+                placeholder="Prénom"
+                required>
+
+            <input
+                id="manual-last-name"
+                placeholder="Nom"
+                required>
+
+            <input
+                id="manual-street"
+                placeholder="Rue"
+                required>
+
+            <input
+                id="manual-city"
+                placeholder="Ville"
+                value="Saint-Witz"
+                required>
+
+            <input
+                id="manual-complement"
+                placeholder="Complément">
+
+            <input
+                id="manual-email"
+                type="email"
+                placeholder="E-mail"
+                required>
+
+            <input
+                id="manual-phone"
+                placeholder="Téléphone">
+
+            <select
+                id="manual-model"
+                required>
+
+                <option value="">
+                    Modèle
+                </option>
+
+                <option>
+                    Modèle Simple - 1 couleur
+                </option>
+
+                <option>
+                    Modèle Simple - 2 couleurs
+                </option>
+
+                <option>
+                    Modèle Personnalisable - 1 couleur
+                </option>
+
+                <option>
+                    Modèle Personnalisable - 2 couleurs
+                </option>
+
+                <option>
+                    Mon 1er Noël
+                </option>
+
+            </select>
+
+            <input
+                id="manual-personalization"
+                placeholder="Prénom à écrire">
+
+            <label class="checkbox">
+
+                <input
+                    id="manual-color"
+                    type="checkbox">
+
+                Couleur spécifique
+
+            </label>
+
+            <button
+                class="btn primary full">
+
+                Créer la commande
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+</main>
+
+
+<footer>
+
+    <strong>
+        🎄 L'Atelier de Noël 3D
+    </strong>
+
+    <span>
+        Créations imprimées en 3D à Saint-Witz
+    </span>
+
+</footer>
+
+
+<!-- =========================================================
+     SUPABASE
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+<script src="app.js">
+</script>
+
+</body>
+
+</html>
