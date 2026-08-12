@@ -9,25 +9,31 @@
 ============================================================ */
 
 /*
-    IMPORTANT :
-
-    Cette clé est une Publishable key.
-    Elle peut être utilisée dans un site GitHub Pages.
-
-    NE JAMAIS mettre ici :
-    - sb_secret_...
-    - service_role
+    URL de ton projet Supabase
 */
 
 const SUPABASE_URL =
     "https://sdqtgluhgywedjwgolei.supabase.co";
+
+
+/*
+    COLLE ICI TA PUBLISHABLE KEY
+
+    Elle commence par :
+
+    sb_publishable_...
+
+    NE METS JAMAIS :
+    - sb_secret_...
+    - service_role
+*/
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_zY7V5CoRa2mYRYhZdm8v7Q_lc5U1Lm_";
 
 
 /*
-    Création de la connexion Supabase
+    Connexion à Supabase
 */
 
 const db = supabase.createClient(
@@ -42,32 +48,24 @@ const db = supabase.createClient(
 
 function showPage(pageId) {
 
-    document
-        .querySelectorAll(".page")
-        .forEach(page => {
-
-            page.classList.remove("active");
-
-        });
-
-
     const page =
         document.getElementById(pageId);
 
 
     if (!page) {
+
         console.error(
             "Page introuvable :",
             pageId
         );
+
         return;
     }
 
 
     /*
-        Si quelqu'un essaye d'ouvrir
-        l'administration sans être connecté,
-        on l'envoie vers la connexion.
+        L'administration possède sa propre
+        vérification de connexion.
     */
 
     if (pageId === "admin") {
@@ -77,6 +75,23 @@ function showPage(pageId) {
         return;
 
     }
+
+
+    /*
+        Navigation normale du site.
+
+        IMPORTANT :
+        Cette partie permet aux catégories
+        et aux boutons du catalogue de fonctionner.
+    */
+
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+
+            page.classList.remove("active");
+
+        });
 
 
     page.classList.add("active");
@@ -90,8 +105,8 @@ function showPage(pageId) {
 }
 
 
-//* ============================================================
-   OUVRIR L'ESPACE ADMIN APRÈS CONNEXION
+/* ============================================================
+   3. OUVRIR L'ADMINISTRATION
 ============================================================ */
 
 async function checkAdminAndOpen() {
@@ -104,7 +119,9 @@ async function checkAdminAndOpen() {
         } = await db.auth.getUser();
 
 
-        /* Pas connecté */
+        /*
+            Pas connecté
+        */
 
         if (
             error ||
@@ -119,14 +136,11 @@ async function checkAdminAndOpen() {
         }
 
 
-        /* ====================================================
-           UTILISATEUR CONNECTÉ
-        ==================================================== */
-
-
         /*
-            On cache TOUTES les pages.
-            Cela évite que admin-login reste affichée.
+            Utilisateur connecté.
+
+            On cache TOUTES les pages avant
+            d'afficher l'administration.
         */
 
         document
@@ -138,10 +152,6 @@ async function checkAdminAndOpen() {
             });
 
 
-        /*
-            On récupère la page admin.
-        */
-
         const adminPage =
             document.getElementById("admin");
 
@@ -149,11 +159,7 @@ async function checkAdminAndOpen() {
         if (!adminPage) {
 
             console.error(
-                "ERREUR : la section #admin est introuvable dans index.html"
-            );
-
-            alert(
-                "Erreur : la page d'administration est introuvable dans le HTML."
+                "La section #admin est introuvable."
             );
 
             return false;
@@ -162,7 +168,7 @@ async function checkAdminAndOpen() {
 
 
         /*
-            On affiche l'administration.
+            Afficher le dashboard
         */
 
         adminPage.classList.add("active");
@@ -175,7 +181,7 @@ async function checkAdminAndOpen() {
 
 
         /*
-            On charge les commandes.
+            Charger les commandes
         */
 
         await loadOrders();
@@ -194,16 +200,14 @@ async function checkAdminAndOpen() {
         );
 
 
-        alert(
-            "La connexion fonctionne, mais l'espace administrateur n'a pas pu être chargé."
-        );
-
+        showPage("admin-login");
 
         return false;
 
     }
 
 }
+
 
 /* ============================================================
    4. CHOIX D'UN MODÈLE
@@ -215,12 +219,15 @@ function selectModel(model) {
 
 
     const modelInput =
-        document.getElementById("model");
+        document.getElementById(
+            "model"
+        );
 
 
     if (modelInput) {
 
-        modelInput.value = model;
+        modelInput.value =
+            model;
 
     }
 
@@ -241,7 +248,7 @@ function selectModel(model) {
 
 
 /* ============================================================
-   5. FORMAT DU NUMÉRO DE COMMANDE
+   5. NUMÉRO DE COMMANDE
 ============================================================ */
 
 function formatOrderNumber(number) {
@@ -341,9 +348,13 @@ if (orderForm) {
                 );
 
 
-            errorBox.classList.add(
-                "hidden"
-            );
+            if (errorBox) {
+
+                errorBox.classList.add(
+                    "hidden"
+                );
+
+            }
 
 
             const button =
@@ -352,10 +363,14 @@ if (orderForm) {
                 );
 
 
-            button.disabled = true;
+            if (button) {
 
-            button.textContent =
-                "Création de la commande...";
+                button.disabled = true;
+
+                button.textContent =
+                    "Création de la commande...";
+
+            }
 
 
             try {
@@ -437,8 +452,7 @@ if (orderForm) {
 
 
                 /*
-                    Supabase renvoie le numéro
-                    créé automatiquement.
+                    Numéro créé par Supabase
                 */
 
                 const orderNumber =
@@ -447,41 +461,39 @@ if (orderForm) {
                     );
 
 
-                document
-                    .getElementById(
+                const successNumber =
+                    document.getElementById(
                         "success-number"
-                    )
-                    .textContent =
-                    orderNumber;
+                    );
 
 
-                /*
-                    On cache le formulaire.
-                */
+                if (successNumber) {
+
+                    successNumber.textContent =
+                        orderNumber;
+
+                }
+
 
                 orderForm.classList.add(
                     "hidden"
                 );
 
 
-                /*
-                    On affiche le succès.
-                */
-
-                document
-                    .getElementById(
+                const success =
+                    document.getElementById(
                         "order-success"
-                    )
-                    .classList.remove(
-                        "hidden"
                     );
 
 
-                /*
-                    On remet le formulaire
-                    à zéro pour une prochaine
-                    commande.
-                */
+                if (success) {
+
+                    success.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
 
                 orderForm.reset();
 
@@ -490,26 +502,36 @@ if (orderForm) {
 
             catch(error) {
 
-                console.error(error);
-
-
-                errorBox.textContent =
-                    "Impossible d'enregistrer la commande. Vérifiez votre connexion ou la configuration Supabase.";
-
-
-                errorBox.classList.remove(
-                    "hidden"
+                console.error(
+                    "Erreur commande :",
+                    error
                 );
+
+
+                if (errorBox) {
+
+                    errorBox.textContent =
+                        "Impossible d'enregistrer la commande. Vérifiez votre connexion ou la configuration Supabase.";
+
+                    errorBox.classList.remove(
+                        "hidden"
+                    );
+
+                }
 
             }
 
 
             finally {
 
-                button.disabled = false;
+                if (button) {
 
-                button.textContent =
-                    "🎄 Valider la commande";
+                    button.disabled = false;
+
+                    button.textContent =
+                        "🎄 Valider la commande";
+
+                }
 
             }
 
@@ -531,12 +553,6 @@ async function trackOrder() {
         );
 
 
-    const raw =
-        input.value
-            .trim()
-            .toUpperCase();
-
-
     const resultBox =
         document.getElementById(
             "tracking-result"
@@ -555,19 +571,26 @@ async function trackOrder() {
         );
 
 
-    resultBox.classList.add(
-        "hidden"
-    );
+    if (!input)
+        return;
 
 
-    errorBox.classList.add(
-        "hidden"
-    );
+    const raw =
+        input.value
+            .trim()
+            .toUpperCase();
 
 
-    loading.classList.remove(
-        "hidden"
-    );
+    if (resultBox)
+        resultBox.classList.add("hidden");
+
+
+    if (errorBox)
+        errorBox.classList.add("hidden");
+
+
+    if (loading)
+        loading.classList.remove("hidden");
 
 
     /*
@@ -584,16 +607,20 @@ async function trackOrder() {
 
     if (!match) {
 
-        loading.classList.add(
-            "hidden"
-        );
+        if (loading)
+            loading.classList.add("hidden");
 
-        errorBox.textContent =
-            "Numéro de commande invalide.";
 
-        errorBox.classList.remove(
-            "hidden"
-        );
+        if (errorBox) {
+
+            errorBox.textContent =
+                "Numéro de commande invalide.";
+
+            errorBox.classList.remove(
+                "hidden"
+            );
+
+        }
 
         return;
 
@@ -615,26 +642,22 @@ async function trackOrder() {
         } = await db.rpc(
             "get_order_status",
             {
+
                 p_order_number:
                     orderNumber
+
             }
         );
 
 
-        if (error) {
-
+        if (error)
             throw error;
 
-        }
 
-
-        if (!data) {
-
+        if (!data)
             throw new Error(
                 "Commande introuvable"
             );
-
-        }
 
 
         displayTracking(data);
@@ -644,25 +667,30 @@ async function trackOrder() {
 
     catch(error) {
 
-        console.error(error);
-
-
-        errorBox.textContent =
-            "Commande introuvable. Vérifiez votre numéro de commande.";
-
-
-        errorBox.classList.remove(
-            "hidden"
+        console.error(
+            "Erreur suivi :",
+            error
         );
+
+
+        if (errorBox) {
+
+            errorBox.textContent =
+                "Commande introuvable. Vérifiez votre numéro de commande.";
+
+            errorBox.classList.remove(
+                "hidden"
+            );
+
+        }
 
     }
 
 
     finally {
 
-        loading.classList.add(
-            "hidden"
-        );
+        if (loading)
+            loading.classList.add("hidden");
 
     }
 
@@ -765,34 +793,36 @@ function displayTracking(order) {
         statuses[order.status];
 
 
-    if (!status) {
-
+    if (!status)
         return;
 
-    }
+
+    if (icon)
+        icon.textContent =
+            status.icon;
 
 
-    icon.textContent =
-        status.icon;
+    if (title)
+        title.textContent =
+            status.title;
 
 
-    title.textContent =
-        status.title;
+    if (description)
+        description.textContent =
+            status.description;
 
 
-    description.textContent =
-        status.description;
+    if (number)
+        number.textContent =
+            formatOrderNumber(
+                order.order_number
+            );
 
 
-    number.textContent =
-        formatOrderNumber(
-            order.order_number
+    if (result)
+        result.classList.remove(
+            "hidden"
         );
-
-
-    result.classList.remove(
-        "hidden"
-    );
 
 }
 
@@ -803,21 +833,16 @@ function displayTracking(order) {
 
 async function adminLogin() {
 
-    const email =
-        document
-            .getElementById(
-                "admin-email"
-            )
-            .value
-            .trim();
+    const emailInput =
+        document.getElementById(
+            "admin-email"
+        );
 
 
-    const password =
-        document
-            .getElementById(
-                "admin-password"
-            )
-            .value;
+    const passwordInput =
+        document.getElementById(
+            "admin-password"
+        );
 
 
     const errorBox =
@@ -826,19 +851,46 @@ async function adminLogin() {
         );
 
 
-    errorBox.classList.add(
-        "hidden"
-    );
+    if (!emailInput || !passwordInput) {
+
+        console.error(
+            "Champs admin introuvables."
+        );
+
+        return;
+
+    }
+
+
+    const email =
+        emailInput.value.trim();
+
+
+    const password =
+        passwordInput.value;
+
+
+    if (errorBox) {
+
+        errorBox.classList.add(
+            "hidden"
+        );
+
+    }
 
 
     if (!email || !password) {
 
-        errorBox.textContent =
-            "Veuillez entrer votre email et votre mot de passe.";
+        if (errorBox) {
 
-        errorBox.classList.remove(
-            "hidden"
-        );
+            errorBox.textContent =
+                "Veuillez entrer votre email et votre mot de passe.";
+
+            errorBox.classList.remove(
+                "hidden"
+            );
+
+        }
 
         return;
 
@@ -868,18 +920,17 @@ async function adminLogin() {
             error
         } = await db.auth.signInWithPassword({
 
-            email: email,
+            email:
+                email,
 
-            password: password
+            password:
+                password
 
         });
 
 
-        if (error) {
-
+        if (error)
             throw error;
-
-        }
 
 
         console.log(
@@ -889,10 +940,58 @@ async function adminLogin() {
 
 
         /*
-            On ouvre l'administration.
+            IMPORTANT :
+
+            On enlève la page de connexion
+            AVANT d'ouvrir l'administration.
         */
 
-        await checkAdminAndOpen();
+        document
+            .querySelectorAll(".page")
+            .forEach(page => {
+
+                page.classList.remove(
+                    "active"
+                );
+
+            });
+
+
+        /*
+            Afficher le dashboard
+        */
+
+        const adminPage =
+            document.getElementById(
+                "admin"
+            );
+
+
+        if (!adminPage) {
+
+            throw new Error(
+                "La section #admin n'existe pas dans index.html"
+            );
+
+        }
+
+
+        adminPage.classList.add(
+            "active"
+        );
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+        /*
+            Charger les commandes
+        */
+
+        await loadOrders();
 
     }
 
@@ -905,13 +1004,35 @@ async function adminLogin() {
         );
 
 
-        errorBox.textContent =
-            "Email ou mot de passe incorrect.";
+        if (errorBox) {
+
+            /*
+                Message plus précis si Supabase
+                renvoie une erreur connue.
+            */
+
+            if (
+                error.message &&
+                error.message.length < 150
+            ) {
+
+                errorBox.textContent =
+                    error.message;
+
+            }
+            else {
+
+                errorBox.textContent =
+                    "Email ou mot de passe incorrect.";
+
+            }
 
 
-        errorBox.classList.remove(
-            "hidden"
-        );
+            errorBox.classList.remove(
+                "hidden"
+            );
+
+        }
 
     }
 
@@ -923,7 +1044,7 @@ async function adminLogin() {
             button.disabled = false;
 
             button.textContent =
-                "Entrer";
+                "🔐 Se connecter";
 
         }
 
@@ -944,9 +1065,13 @@ async function logoutAdmin() {
 
     }
 
+
     catch(error) {
 
-        console.error(error);
+        console.error(
+            "Erreur déconnexion :",
+            error
+        );
 
     }
 
@@ -1016,14 +1141,13 @@ async function loadOrders() {
             );
 
 
-        if (error) {
-
+        if (error)
             throw error;
 
-        }
 
-
-        renderOrders(data || []);
+        renderOrders(
+            data || []
+        );
 
     }
 
@@ -1062,6 +1186,10 @@ function renderOrders(orders) {
         );
 
 
+    if (!tbody)
+        return;
+
+
     tbody.innerHTML = "";
 
 
@@ -1074,34 +1202,16 @@ function renderOrders(orders) {
 
     orders.forEach(order => {
 
-        if (
-            order.status ===
-            "pending"
-        ) {
-
+        if (order.status === "pending")
             pending++;
 
-        }
 
-
-        if (
-            order.status ===
-            "production"
-        ) {
-
+        if (order.status === "production")
             production++;
 
-        }
 
-
-        if (
-            order.status ===
-            "ready"
-        ) {
-
+        if (order.status === "ready")
             ready++;
-
-        }
 
 
         const row =
@@ -1245,8 +1355,7 @@ function renderOrders(orders) {
                     <option
                         value="pending"
                         ${
-                            order.status ===
-                            "pending"
+                            order.status === "pending"
                             ?
                             "selected"
                             :
@@ -1261,8 +1370,7 @@ function renderOrders(orders) {
                     <option
                         value="production"
                         ${
-                            order.status ===
-                            "production"
+                            order.status === "production"
                             ?
                             "selected"
                             :
@@ -1277,8 +1385,7 @@ function renderOrders(orders) {
                     <option
                         value="ready"
                         ${
-                            order.status ===
-                            "ready"
+                            order.status === "ready"
                             ?
                             "selected"
                             :
@@ -1293,8 +1400,7 @@ function renderOrders(orders) {
                     <option
                         value="delivered"
                         ${
-                            order.status ===
-                            "delivered"
+                            order.status === "delivered"
                             ?
                             "selected"
                             :
@@ -1312,45 +1418,52 @@ function renderOrders(orders) {
         `;
 
 
-        tbody.appendChild(row);
+        tbody.appendChild(
+            row
+        );
 
     });
 
 
-    /*
-        Statistiques
-    */
-
-    document
-        .getElementById(
+    const total =
+        document.getElementById(
             "stat-total"
-        )
-        .textContent =
-        orders.length;
+        );
 
-
-    document
-        .getElementById(
+    const pendingElement =
+        document.getElementById(
             "stat-pending"
-        )
-        .textContent =
-        pending;
+        );
 
-
-    document
-        .getElementById(
+    const productionElement =
+        document.getElementById(
             "stat-production"
-        )
-        .textContent =
-        production;
+        );
 
-
-    document
-        .getElementById(
+    const readyElement =
+        document.getElementById(
             "stat-ready"
-        )
-        .textContent =
-        ready;
+        );
+
+
+    if (total)
+        total.textContent =
+            orders.length;
+
+
+    if (pendingElement)
+        pendingElement.textContent =
+            pending;
+
+
+    if (productionElement)
+        productionElement.textContent =
+            production;
+
+
+    if (readyElement)
+        readyElement.textContent =
+            ready;
 
 }
 
@@ -1382,16 +1495,9 @@ async function changeStatus(
             );
 
 
-        if (error) {
-
+        if (error)
             throw error;
 
-        }
-
-
-        /*
-            Actualisation du tableau.
-        */
 
         await loadOrders();
 
@@ -1416,37 +1522,49 @@ async function changeStatus(
 
 
 /* ============================================================
-   15. OUVRIR COMMANDE MANUELLE
+   15. COMMANDE MANUELLE
 ============================================================ */
 
 function openManualOrder() {
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "manual-modal"
-        )
-        .classList.remove(
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
             "hidden"
         );
+
+    }
 
 }
 
 
 function closeManualOrder() {
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "manual-modal"
-        )
-        .classList.add(
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
             "hidden"
         );
+
+    }
 
 }
 
 
 /* ============================================================
-   16. COMMANDE MANUELLE
+   16. FORMULAIRE COMMANDE MANUELLE
 ============================================================ */
 
 const manualForm =
@@ -1563,7 +1681,10 @@ if (manualForm) {
 
             catch(error) {
 
-                console.error(error);
+                console.error(
+                    "Erreur commande manuelle :",
+                    error
+                );
 
 
                 alert(
@@ -1579,7 +1700,7 @@ if (manualForm) {
 
 
 /* ============================================================
-   17. ÉCHAPPEMENT HTML
+   17. PROTECTION CONTRE L'HTML INJECTÉ
 ============================================================ */
 
 function escapeHTML(value) {
@@ -1625,7 +1746,7 @@ function escapeHTML(value) {
 
 
 /* ============================================================
-   18. DATE
+   18. FORMAT DATE
 ============================================================ */
 
 function formatDate(date) {
@@ -1638,11 +1759,17 @@ function formatDate(date) {
         .toLocaleDateString(
             "fr-FR",
             {
+
                 day: "2-digit",
+
                 month: "2-digit",
+
                 year: "numeric",
+
                 hour: "2-digit",
+
                 minute: "2-digit"
+
             }
         );
 
@@ -1720,10 +1847,6 @@ function createSnowflake() {
 }
 
 
-/*
-    Un flocon toutes les 350 ms
-*/
-
 setInterval(
     createSnowflake,
     350
@@ -1739,29 +1862,43 @@ document.addEventListener(
     async function() {
 
         /*
-            Page d'accueil
+            Accueil
         */
 
         showPage("home");
 
 
         /*
-            Si une session admin existe déjà,
-            elle sera conservée par Supabase.
+            Vérifier s'il existe déjà
+            une session Supabase.
         */
 
-        const {
-            data
-        } = await db.auth.getUser();
+        try {
+
+            const {
+                data
+            } = await db.auth.getUser();
 
 
-        if (
-            data &&
-            data.user
-        ) {
+            if (
+                data &&
+                data.user
+            ) {
 
-            console.log(
-                "Session Supabase active."
+                console.log(
+                    "Session Supabase active."
+                );
+
+            }
+
+        }
+
+
+        catch(error) {
+
+            console.error(
+                "Erreur initialisation Supabase :",
+                error
             );
 
         }
