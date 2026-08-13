@@ -195,31 +195,28 @@ async function loadProducts() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-            .from("products")
-            .select("*")
-            .eq("active", true)
-            .order("price", {
-                ascending: true
-            });
-
+    } = await supabaseClient
+        .from("products")
+        .select("*")
+        .order("price", {
+            ascending: true
+        });
 
     if (error) {
 
         console.error(
-            "Erreur chargement produits :",
+            "❌ Erreur Supabase produits :",
             error
         );
 
         const catalog =
-            $("catalog-products");
+            document.getElementById("catalog-products");
 
         if (catalog) {
 
             catalog.innerHTML = `
                 <div class="message error">
-                    Impossible de charger le catalogue.
+                    <strong>Impossible de charger le catalogue.</strong>
                     <br><br>
                     ${error.message}
                 </div>
@@ -229,22 +226,57 @@ async function loadProducts() {
         return;
     }
 
+    console.log(
+        "✅ Produits récupérés depuis Supabase :",
+        data
+    );
 
     PRODUCTS = data || [];
 
-    console.log(
-        "Produits chargés :",
-        PRODUCTS
-    );
+    if (PRODUCTS.length === 0) {
 
+        console.warn(
+            "⚠️ Aucun produit récupéré."
+        );
 
+        const catalog =
+            document.getElementById("catalog-products");
+
+        if (catalog) {
+
+            catalog.innerHTML = `
+                <div class="message error">
+                    Aucun produit n'a été récupéré depuis Supabase.
+                </div>
+            `;
+        }
+
+        return;
+    }
+
+    /*
+     * Affichage du catalogue
+     */
     renderCatalog();
 
+    /*
+     * Produits affichés sur l'accueil
+     */
     renderHomeProducts();
 
+    /*
+     * Produits disponibles dans le formulaire
+     */
     renderOrderProducts();
 
+    /*
+     * Produits disponibles pour l'administration
+     */
     renderManualProducts();
+
+    console.log(
+        `🎄 ${PRODUCTS.length} produits affichés.`
+    );
 }
 
 
