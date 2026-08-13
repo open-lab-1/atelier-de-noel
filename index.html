@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L'Atelier de Noël 3D — Saint-Witz</title>
+  <meta name="description" content="Boules de Noël personnalisées imprimées en 3D à Saint-Witz et alentours.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="snow"></div>
+
+<header class="site-header">
+  <a class="brand" href="#" onclick="showPage('home'); return false;">
+    <span class="brand-ball">ST-WITZ</span>
+    <span>L'Atelier de Noël 3D</span>
+  </a>
+  <nav>
+    <button onclick="showPage('home')">Accueil</button>
+    <button onclick="showPage('catalog')">Catalogue</button>
+    <button onclick="showPage('order')">Commander</button>
+    <button onclick="showPage('tracking')">Suivre ma commande</button>
+    <button class="admin-nav" onclick="showPage('admin-login')" aria-label="Administration">🔒</button>
+  </nav>
+</header>
+
+<main>
+  <section id="home" class="page active">
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">SAINT-WITZ & ALENTOURS</p>
+        <h1>Des boules de Noël<br><span>créées pour vous.</span></h1>
+        <p class="hero-text">Choisissez votre modèle, vos couleurs et, si vous le souhaitez, ajoutez un prénom ou une année.</p>
+        <div class="hero-actions">
+          <button class="btn primary" onclick="showPage('catalog')">Découvrir les modèles</button>
+          <button class="btn secondary" onclick="showPage('order')">Passer commande</button>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="large-ball">
+          <div class="ball-text">ST-WITZ</div>
+          <div class="ball-star">✦</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-strip">
+      <div><strong>À partir de 3 €</strong><span>des créations accessibles</span></div>
+      <div><strong>Personnalisables</strong><span>prénom, année et couleurs</span></div>
+      <div><strong>50 / 50</strong><span>paiement au passage puis à la livraison</span></div>
+      <div><strong>-15 %</strong><span>à partir de 5 boules</span></div>
+    </div>
+
+    <div class="section-heading">
+      <p class="eyebrow">L'ATELIER</p>
+      <h2>Découvrez les modèles</h2>
+      <p>Des décorations pensées pour être chaleureuses, originales et uniques.</p>
+    </div>
+    <div id="home-products" class="product-grid compact"></div>
+  </section>
+
+  <section id="catalog" class="page">
+    <div class="section-heading">
+      <p class="eyebrow">CATALOGUE</p>
+      <h1>Choisissez votre boule</h1>
+      <p>Chaque modèle peut être réalisé avec les options indiquées ci-dessous.</p>
+    </div>
+    <div id="catalog-products" class="product-grid"></div>
+  </section>
+
+  <section id="order" class="page">
+    <div class="section-heading">
+      <p class="eyebrow">COMMANDE</p>
+      <h1>Créez votre boule</h1>
+      <p>Les options inutiles sont automatiquement masquées selon le modèle choisi.</p>
+    </div>
+
+    <div class="order-layout">
+      <form id="order-form" class="card form-card">
+        <div class="step-title"><span>1</span> Vos coordonnées</div>
+        <div class="form-grid">
+          <label>Prénom<input id="first-name" required></label>
+          <label>Nom<input id="last-name" required></label>
+          <label class="wide">E-mail<input id="email" type="email" required></label>
+          <label>Téléphone <small>(optionnel)</small><input id="phone" type="tel"></label>
+          <label>Rue et numéro<input id="street" required></label>
+          <label>Ville<input id="city" value="Saint-Witz" required></label>
+          <label class="wide">Complément d'adresse <small>(optionnel)</small><input id="complement"></label>
+        </div>
+
+        <div class="step-title"><span>2</span> Votre modèle</div>
+        <input type="hidden" id="product-id">
+        <div id="order-product-grid" class="choice-grid"></div>
+
+        <div id="order-design-block" class="option-block hidden">
+          <h3>Choisissez le modèle</h3>
+          <div id="order-design-options" class="pills"></div>
+        </div>
+
+        <div id="order-personalization-block" class="option-block hidden">
+          <h3>Personnalisation</h3>
+          <p id="personalization-help" class="muted"></p>
+          <div class="form-grid">
+            <label>Prénom à inscrire<input id="personalization-name"></label>
+            <label id="year-field" class="hidden">Année<input id="personalization-year" type="number" min="1900" max="2200" placeholder="2026"></label>
+          </div>
+        </div>
+
+        <div id="order-colors-block" class="option-block hidden">
+          <h3>Choisissez vos deux couleurs</h3>
+          <div class="form-grid">
+            <label>Couleur 1<select id="color-1"></select></label>
+            <label>Couleur 2<select id="color-2"></select></label>
+          </div>
+        </div>
+
+        <div class="option-block">
+          <h3>Options</h3>
+          <label class="check-row"><input id="specific-color" type="checkbox"> Demande de couleur spécifique <strong>+7 €</strong></label>
+          <label class="quantity">Quantité<input id="quantity" type="number" min="1" max="50" value="1"></label>
+        </div>
+
+        <div class="promo-note" id="promo-message">À partir de 5 boules : -15 % sur les boules.</div>
+        <div id="order-error" class="message error hidden"></div>
+
+        <button id="order-submit" class="btn primary full" type="submit">Valider la commande</button>
+      </form>
+
+      <aside class="card price-card">
+        <div class="step-title"><span>3</span> Votre tarif</div>
+        <div class="price-lines">
+          <div><span>Sous-total</span><strong id="subtotal">0,00 €</strong></div>
+          <div><span>Supplément couleur spécifique</span><strong id="color-surcharge">0,00 €</strong></div>
+          <div><span>Réduction</span><strong id="discount">0,00 €</strong></div>
+          <div class="total"><span>Total</span><strong id="total">0,00 €</strong></div>
+        </div>
+        <div class="split-payment">
+          <div><small>À payer lors du passage</small><strong id="deposit">0,00 €</strong></div>
+          <div><small>À payer à la livraison</small><strong id="delivery">0,00 €</strong></div>
+        </div>
+        <p class="muted">Le prix est partagé 50/50. Le premier paiement est effectué en espèces lors du passage pour valider la commande.</p>
+      </aside>
+    </div>
+
+    <div id="order-success" class="success-card hidden">
+      <div class="success-icon">✓</div>
+      <h2>Commande reçue !</h2>
+      <p>Votre numéro de commande est</p>
+      <strong id="success-number" class="order-number"></strong>
+      <p>Statut actuel : <strong>En attente de passage</strong></p>
+      <button class="btn primary" onclick="showPage('tracking')">Suivre ma commande</button>
+    </div>
+  </section>
+
+  <section id="tracking" class="page">
+    <div class="section-heading">
+      <p class="eyebrow">SUIVI</p>
+      <h1>Suivez votre commande</h1>
+      <p>Entrez votre numéro, par exemple <strong>#SW-042</strong>.</p>
+    </div>
+    <div class="tracking-card card">
+      <div class="tracking-search">
+        <input id="tracking-number" placeholder="#SW-042" autocomplete="off">
+        <button class="btn primary" onclick="trackOrder()">Rechercher</button>
+      </div>
+      <div id="tracking-loading" class="muted hidden">Recherche...</div>
+      <div id="tracking-error" class="message error hidden"></div>
+      <div id="tracking-result" class="tracking-result hidden">
+        <div id="tracking-icon" class="status-icon"></div>
+        <p class="eyebrow">COMMANDE <span id="tracking-order-number"></span></p>
+        <h2 id="tracking-title"></h2>
+        <p id="tracking-description"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="admin-login" class="page">
+    <div class="auth-card card">
+      <div class="lock">🔒</div>
+      <p class="eyebrow">ESPACE PRIVÉ</p>
+      <h1>Administration</h1>
+      <p class="muted">Connectez-vous avec le compte administrateur créé dans Supabase Auth.</p>
+      <label>E-mail<input id="admin-email" type="email" autocomplete="email"></label>
+      <label>Mot de passe<input id="admin-password" type="password" autocomplete="current-password"></label>
+      <button class="btn primary full" onclick="adminLogin()">Se connecter</button>
+      <div id="admin-login-error" class="message error hidden"></div>
+    </div>
+  </section>
+
+  <section id="admin" class="page">
+    <div class="admin-header">
+      <div>
+        <p class="eyebrow">TABLEAU DE BORD</p>
+        <h1>Administration</h1>
+      </div>
+      <div class="admin-actions">
+        <button class="btn secondary" onclick="openManualOrder()">+ Commande manuelle</button>
+        <button class="btn ghost" onclick="logoutAdmin()">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><small>Commandes</small><strong id="stat-total">0</strong></div>
+      <div class="stat"><small>En attente</small><strong id="stat-pending">0</strong></div>
+      <div class="stat"><small>Fabrication</small><strong id="stat-production">0</strong></div>
+      <div class="stat"><small>Prêtes</small><strong id="stat-ready">0</strong></div>
+      <div class="stat"><small>Chiffre commandes</small><strong id="stat-revenue">0 €</strong></div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-top">
+        <h2>Toutes les commandes</h2>
+        <button class="btn ghost" onclick="loadOrders()">Actualiser</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>N°</th><th>Client</th><th>Adresse</th><th>Produit</th><th>Personnalisation</th><th>Couleurs</th><th>Prix</th><th>Statut</th></tr>
+          </thead>
+          <tbody id="orders-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="manual-modal" class="modal hidden">
+  <div class="modal-box card">
+    <button class="modal-close" onclick="closeManualOrder()">×</button>
+    <p class="eyebrow">ADMIN</p>
+    <h2>Créer une commande manuelle</h2>
+    <p class="muted">Pratique pour une commande prise directement lors du porte-à-porte.</p>
+    <form id="manual-form">
+      <div class="form-grid">
+        <label>Prénom<input id="manual-first-name" required></label>
+        <label>Nom<input id="manual-last-name" required></label>
+        <label class="wide">E-mail<input id="manual-email" type="email" required></label>
+        <label>Téléphone<input id="manual-phone"></label>
+        <label>Rue et numéro<input id="manual-street" required></label>
+        <label>Ville<input id="manual-city" value="Saint-Witz" required></label>
+        <label class="wide">Complément<input id="manual-complement"></label>
+      </div>
+
+      <input type="hidden" id="manual-product-id">
+      <h3>Modèle</h3>
+      <div id="manual-product-grid" class="choice-grid"></div>
+      <div id="manual-design-block" class="option-block hidden"><h3>Modèle visuel</h3><div id="manual-design-options" class="pills"></div></div>
+      <div id="manual-personalization-block" class="option-block hidden">
+        <div class="form-grid">
+          <label>Prénom<input id="manual-personalization-name"></label>
+          <label>Année<input id="manual-personalization-year" type="number" min="1900" max="2200"></label>
+        </div>
+      </div>
+      <div id="manual-colors-block" class="option-block hidden">
+        <div class="form-grid">
+          <label>Couleur 1<select id="manual-color-1"></select></label>
+          <label>Couleur 2<select id="manual-color-2"></select></label>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="check-row"><input id="manual-specific-color" type="checkbox"> Couleur spécifique +7 €</label>
+        <label>Quantité<input id="manual-quantity" type="number" min="1" max="50" value="1"></label>
+      </div>
+      <div id="manual-price" class="manual-price"></div>
+      <button class="btn primary full" type="submit">Créer la commande</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <strong>L'Atelier de Noël 3D</strong>
+  <span>Saint-Witz & alentours</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
