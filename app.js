@@ -1,94 +1,41 @@
 /* =========================================================
-   L'ATELIER DE NOËL 3D
+   🎄 L'ATELIER DE NOËL 3D
    app.js
+   Compatible avec ton index.html actuel
    ========================================================= */
 
-/* ---------------------------------------------------------
-   1. CONFIGURATION SUPABASE
-   --------------------------------------------------------- */
 
-// Ton URL Supabase
-const SUPABASE_URL = "https://sdqtgluhgywedjwgolei.supabase.co";
+/* =========================================================
+   1. SUPABASE
+   ========================================================= */
 
-// ⚠️ COLLE ICI TA CLÉ "Publishable key"
-// Elle commence par : sb_publishable_
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zY7V5CoRa2mYRYhZdm8v7Q_lc5U1Lm_";
+const SUPABASE_URL =
+    "https://sdqtgluhgywedjwgolei.supabase.co";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+/*
+   ⚠️ COLLE ICI TA PUBLISHABLE KEY SUPABASE
+
+   Elle commence normalement par :
+   sb_publishable_
+
+   NE METS PAS la Secret Key.
+*/
+const SUPABASE_KEY =
+    "sb_publishable_zY7V5CoRa2mYRYhZdm8v7Q_lc5U1Lm_";
 
 
-/* ---------------------------------------------------------
-   2. PRODUITS
-   --------------------------------------------------------- */
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
-const PRODUCTS = {
-    simple_1: {
-        name: "Modèle simple — 1 couleur",
-        price: 3,
-        customizable: false,
-        twoColors: false
-    },
 
-    simple_2: {
-        name: "Modèle simple — 2 couleurs",
-        price: 4,
-        customizable: false,
-        twoColors: true
-    },
+/* =========================================================
+   2. CONFIGURATION
+   ========================================================= */
 
-    prenom_1: {
-        name: "Personnalisable — prénom — 1 couleur",
-        price: 5,
-        customizable: true,
-        year: false,
-        twoColors: false
-    },
-
-    prenom_2: {
-        name: "Personnalisable — prénom — 2 couleurs",
-        price: 6,
-        customizable: true,
-        year: false,
-        twoColors: true
-    },
-
-    prenom_annee_1: {
-        name: "Personnalisable — prénom + année — 1 couleur",
-        price: 6,
-        customizable: true,
-        year: true,
-        twoColors: false
-    },
-
-    prenom_annee_2: {
-        name: "Personnalisable — prénom + année — 2 couleurs",
-        price: 7,
-        customizable: true,
-        year: true,
-        twoColors: true
-    },
-
-    premier_noel_1: {
-        name: "Mon premier Noël — 1 couleur",
-        price: 7,
-        customizable: true,
-        year: true,
-        twoColors: false
-    },
-
-    premier_noel_2: {
-        name: "Mon premier Noël — 2 couleurs",
-        price: 8,
-        customizable: true,
-        year: true,
-        twoColors: true
-    }
-};
-
-const COLOR_OPTIONS = [
+const COLOR_LIST = [
     "Bleu",
     "Blanc",
     "Noir",
@@ -99,83 +46,63 @@ const COLOR_OPTIONS = [
 ];
 
 const COLOR_SUPPLEMENT = 7;
-const BULK_DISCOUNT_MIN = 5;
-const BULK_DISCOUNT = 0.15;
+const DISCOUNT_MIN_QUANTITY = 5;
+const DISCOUNT_RATE = 0.15;
 
 
-/* ---------------------------------------------------------
-   3. OUTILS
-   --------------------------------------------------------- */
+/* =========================================================
+   3. PRODUITS
+   ========================================================= */
+
+let PRODUCTS = [];
+
+
+/* =========================================================
+   4. OUTILS
+   ========================================================= */
 
 function $(id) {
     return document.getElementById(id);
 }
 
-function show(element) {
+
+function show(idOrElement) {
+
+    const element =
+        typeof idOrElement === "string"
+            ? $(idOrElement)
+            : idOrElement;
+
     if (element) {
         element.classList.remove("hidden");
     }
 }
 
-function hide(element) {
+
+function hide(idOrElement) {
+
+    const element =
+        typeof idOrElement === "string"
+            ? $(idOrElement)
+            : idOrElement;
+
     if (element) {
         element.classList.add("hidden");
     }
 }
 
-function euro(value) {
-    return Number(value || 0).toFixed(2).replace(".", ",") + " €";
+
+function money(value) {
+
+    return Number(value || 0)
+        .toFixed(2)
+        .replace(".", ",") + " €";
 }
 
 
-/* ---------------------------------------------------------
-   4. FLOCONS
-   --------------------------------------------------------- */
-
-function createSnowflakes() {
-
-    const container = document.createElement("div");
-
-    container.id = "snow-container";
-
-    container.style.position = "fixed";
-    container.style.inset = "0";
-    container.style.pointerEvents = "none";
-    container.style.overflow = "hidden";
-    container.style.zIndex = "0";
-
-    document.body.appendChild(container);
-
-    for (let i = 0; i < 35; i++) {
-
-        const snow = document.createElement("div");
-
-        snow.textContent = "❄";
-
-        snow.style.position = "absolute";
-        snow.style.top = "-30px";
-        snow.style.left = Math.random() * 100 + "%";
-        snow.style.opacity = Math.random() * 0.5 + 0.2;
-        snow.style.fontSize =
-            Math.random() * 10 + 8 + "px";
-
-        const duration =
-            Math.random() * 8 + 8;
-
-        snow.style.animation =
-            `snowfall ${duration}s linear infinite`;
-
-        snow.style.animationDelay =
-            Math.random() * 8 + "s";
-
-        container.appendChild(snow);
-    }
-}
-
-
-/* ---------------------------------------------------------
+/* =========================================================
    5. NAVIGATION
-   --------------------------------------------------------- */
+   ========================================================= */
 
 function showPage(pageId) {
 
@@ -187,379 +114,1061 @@ function showPage(pageId) {
 
     const page = $(pageId);
 
-    if (page) {
-        page.classList.add("active");
+    if (!page) {
+        console.error(
+            "Page introuvable :",
+            pageId
+        );
+        return;
     }
+
+    page.classList.add("active");
 
     window.scrollTo({
         top: 0,
         behavior: "smooth"
     });
+
+
+    /*
+       Si on ouvre l'administration,
+       vérifier la session.
+    */
+
+    if (pageId === "admin") {
+        checkAdminSession();
+    }
 }
 
 
-/* ---------------------------------------------------------
-   6. CHOIX DU PRODUIT
-   --------------------------------------------------------- */
+/* =========================================================
+   6. FLOCONS
+   ========================================================= */
 
-function updateProductOptions() {
+function createSnow() {
 
-    const select = $("model");
+    const container = $("snow");
 
-    if (!select) return;
+    if (!container) return;
 
-    const product = PRODUCTS[select.value];
+    container.innerHTML = "";
 
-    if (!product) return;
+    for (let i = 0; i < 35; i++) {
 
-    const personalization =
-        $("personalization-options");
+        const flake =
+            document.createElement("span");
 
-    const colors =
-        $("color-options");
+        flake.textContent = "❄";
 
-    const color1 =
-        $("color-1");
+        flake.style.position = "absolute";
+        flake.style.left =
+            Math.random() * 100 + "%";
 
-    const color2 =
-        $("color-2");
+        flake.style.top =
+            Math.random() * -100 + "px";
 
-    /* Personnalisation */
+        flake.style.opacity =
+            Math.random() * 0.5 + 0.2;
+
+        flake.style.fontSize =
+            Math.random() * 12 + 8 + "px";
+
+        flake.style.animation =
+            `snowfall ${Math.random() * 8 + 8}s linear infinite`;
+
+        flake.style.animationDelay =
+            Math.random() * 8 + "s";
+
+        container.appendChild(flake);
+    }
+}
+
+
+/* =========================================================
+   7. CHARGEMENT DES PRODUITS SUPABASE
+   ========================================================= */
+
+async function loadProducts() {
+
+    console.log("🎄 Chargement des produits...");
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("products")
+            .select("*")
+            .eq("active", true)
+            .order("price", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.error(
+            "Erreur chargement produits :",
+            error
+        );
+
+        const catalog =
+            $("catalog-products");
+
+        if (catalog) {
+
+            catalog.innerHTML = `
+                <div class="message error">
+                    Impossible de charger le catalogue.
+                    <br><br>
+                    ${error.message}
+                </div>
+            `;
+        }
+
+        return;
+    }
+
+
+    PRODUCTS = data || [];
+
+    console.log(
+        "Produits chargés :",
+        PRODUCTS
+    );
+
+
+    renderCatalog();
+
+    renderHomeProducts();
+
+    renderOrderProducts();
+
+    renderManualProducts();
+}
+
+
+/* =========================================================
+   8. CARTE PRODUIT
+   ========================================================= */
+
+function createProductCard(product) {
+
+    const imageHTML =
+        product.image_url
+            ? `
+                <div class="product-image">
+                    <img
+                        src="${product.image_url}"
+                        alt="${product.name}"
+                    >
+                </div>
+              `
+            : `
+                <div class="product-image placeholder">
+                    <div class="placeholder-ball">
+                        ST-WITZ
+                    </div>
+                </div>
+              `;
+
+
+    let options = "";
+
 
     if (product.customizable) {
 
-        show(personalization);
-
-        const firstName =
-            $("custom-first-name");
-
-        if (firstName) {
-            firstName.required = true;
-        }
-
-        const year =
-            $("custom-year");
-
-        if (product.year) {
-
-            show($("year-field"));
-
-            if (year) {
-                year.required = true;
-            }
-
-        } else {
-
-            hide($("year-field"));
-
-            if (year) {
-                year.required = false;
-            }
-        }
-
-    } else {
-
-        hide(personalization);
-
-        if ($("custom-first-name")) {
-            $("custom-first-name").required = false;
-        }
-
-        if ($("custom-year")) {
-            $("custom-year").required = false;
-        }
+        options += `
+            <span class="product-tag">
+                Personnalisable
+            </span>
+        `;
     }
 
 
-    /* Deux couleurs */
+    if (product.has_year) {
 
-    if (product.twoColors) {
-
-        show(colors);
-
-        if (color1) color1.required = true;
-        if (color2) color2.required = true;
-
-    } else {
-
-        hide(colors);
-
-        if (color1) color1.required = false;
-        if (color2) color2.required = false;
+        options += `
+            <span class="product-tag">
+                Prénom + année
+            </span>
+        `;
     }
 
-    updateTotal();
+
+    if (product.two_colors) {
+
+        options += `
+            <span class="product-tag">
+                2 couleurs
+            </span>
+        `;
+    } else {
+
+        options += `
+            <span class="product-tag">
+                1 couleur
+            </span>
+        `;
+    }
+
+
+    return `
+        <article
+            class="product-card"
+            data-product-id="${product.id}"
+        >
+
+            ${imageHTML}
+
+            <div class="product-content">
+
+                <h3>
+                    ${product.name}
+                </h3>
+
+                <p>
+                    ${product.description || ""}
+                </p>
+
+                <div class="product-tags">
+                    ${options}
+                </div>
+
+                <div class="product-bottom">
+
+                    <strong class="product-price">
+                        ${money(product.price)}
+                    </strong>
+
+                    <button
+                        class="btn primary"
+                        onclick="chooseProduct('${product.id}')"
+                    >
+                        Choisir
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+    `;
 }
 
 
-/* ---------------------------------------------------------
-   7. CALCUL DU PRIX
-   --------------------------------------------------------- */
+/* =========================================================
+   9. CATALOGUE
+   ========================================================= */
 
-function calculatePrice() {
+function renderCatalog() {
 
-    const select = $("model");
+    const container =
+        $("catalog-products");
 
-    if (!select) {
-        return {
-            base: 0,
-            supplement: 0,
-            discount: 0,
-            total: 0,
-            deposit: 0,
-            delivery: 0
-        };
+    if (!container) return;
+
+
+    if (!PRODUCTS.length) {
+
+        container.innerHTML = `
+            <div class="message">
+                Aucun modèle disponible.
+            </div>
+        `;
+
+        return;
     }
 
-    const product = PRODUCTS[select.value];
+
+    container.innerHTML =
+        PRODUCTS
+            .map(createProductCard)
+            .join("");
+}
+
+
+/* =========================================================
+   10. PRODUITS ACCUEIL
+   ========================================================= */
+
+function renderHomeProducts() {
+
+    const container =
+        $("home-products");
+
+    if (!container) return;
+
+
+    /*
+       On affiche les produits sur l'accueil.
+       Maximum 8.
+    */
+
+    container.innerHTML =
+        PRODUCTS
+            .map(createProductCard)
+            .join("");
+}
+
+
+/* =========================================================
+   11. PRODUITS DE LA COMMANDE
+   ========================================================= */
+
+function renderOrderProducts() {
+
+    const container =
+        $("order-product-grid");
+
+    if (!container) return;
+
+
+    container.innerHTML = "";
+
+
+    PRODUCTS.forEach(product => {
+
+        const button =
+            document.createElement("button");
+
+        button.type = "button";
+
+        button.className =
+            "choice-card";
+
+
+        button.dataset.productId =
+            product.id;
+
+
+        button.innerHTML = `
+
+            <div class="choice-card-image">
+
+                ${
+                    product.image_url
+
+                    ?
+
+                    `<img
+                        src="${product.image_url}"
+                        alt="${product.name}"
+                    >`
+
+                    :
+
+                    `<div class="choice-placeholder">
+                        ST-WITZ
+                    </div>`
+                }
+
+            </div>
+
+            <div>
+
+                <strong>
+                    ${product.name}
+                </strong>
+
+                <span>
+                    ${money(product.price)}
+                </span>
+
+            </div>
+        `;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectOrderProduct(
+                    product.id
+                );
+
+            }
+        );
+
+
+        container.appendChild(button);
+    });
+}
+
+
+/* =========================================================
+   12. CHOISIR UN PRODUIT
+   ========================================================= */
+
+function chooseProduct(productId) {
+
+    showPage("order");
+
+    setTimeout(() => {
+
+        selectOrderProduct(productId);
+
+    }, 100);
+}
+
+
+function selectOrderProduct(productId) {
+
+    const product =
+        PRODUCTS.find(
+            p => String(p.id) === String(productId)
+        );
+
 
     if (!product) {
+        console.error(
+            "Produit introuvable :",
+            productId
+        );
+        return;
+    }
+
+
+    $("product-id").value =
+        product.id;
+
+
+    /*
+       Sélection visuelle
+    */
+
+    document
+        .querySelectorAll(
+            "#order-product-grid .choice-card"
+        )
+        .forEach(card => {
+
+            card.classList.toggle(
+                "selected",
+                String(
+                    card.dataset.productId
+                ) === String(product.id)
+            );
+
+        });
+
+
+    updateOrderOptions(product);
+
+    updatePrice();
+}
+
+
+/* =========================================================
+   13. OPTIONS DU PRODUIT
+   ========================================================= */
+
+function updateOrderOptions(product) {
+
+
+    /* -----------------------------------------------------
+       MODÈLE VISUEL
+       ----------------------------------------------------- */
+
+    const designBlock =
+        $("order-design-block");
+
+    const designOptions =
+        $("order-design-options");
+
+
+    /*
+       Les modèles disponibles :
+       Rennes
+       Sapin
+       Bonhomme de neige
+       Étoile
+    */
+
+    if (designBlock && designOptions) {
+
+        designOptions.innerHTML = `
+
+            <button
+                type="button"
+                class="pill"
+                data-design="Renne"
+            >
+                🦌 Renne
+            </button>
+
+            <button
+                type="button"
+                class="pill"
+                data-design="Sapin"
+            >
+                Sapin
+            </button>
+
+            <button
+                type="button"
+                class="pill"
+                data-design="Bonhomme de neige"
+            >
+                ⛄ Bonhomme de neige
+            </button>
+
+            <button
+                type="button"
+                class="pill"
+                data-design="Étoile"
+            >
+                ⭐ Étoile
+            </button>
+        `;
+
+
+        designBlock.classList.remove(
+            "hidden"
+        );
+
+
+        designOptions
+            .querySelectorAll(".pill")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        designOptions
+                            .querySelectorAll(".pill")
+                            .forEach(
+                                b =>
+                                    b.classList.remove(
+                                        "selected"
+                                    )
+                            );
+
+                        button.classList.add(
+                            "selected"
+                        );
+                    }
+                );
+            });
+    }
+
+
+    /* -----------------------------------------------------
+       PERSONNALISATION
+       ----------------------------------------------------- */
+
+    const personalizationBlock =
+        $("order-personalization-block");
+
+
+    if (
+        product.customizable
+    ) {
+
+        show(personalizationBlock);
+
+        const help =
+            $("personalization-help");
+
+        if (help) {
+
+            if (product.has_year) {
+
+                help.textContent =
+                    "Indiquez le prénom et l'année à inscrire sur votre boule.";
+            } else {
+
+                help.textContent =
+                    "Indiquez le prénom à inscrire sur votre boule.";
+            }
+        }
+
+    } else {
+
+        hide(personalizationBlock);
+    }
+
+
+    /* -----------------------------------------------------
+       ANNÉE
+       ----------------------------------------------------- */
+
+    const yearField =
+        $("year-field");
+
+
+    if (
+        product.customizable &&
+        product.has_year
+    ) {
+
+        show(yearField);
+
+    } else {
+
+        hide(yearField);
+    }
+
+
+    /* -----------------------------------------------------
+       DEUX COULEURS
+       ----------------------------------------------------- */
+
+    const colorsBlock =
+        $("order-colors-block");
+
+
+    if (product.two_colors) {
+
+        show(colorsBlock);
+
+        populateColors(
+            "color-1",
+            "color-2"
+        );
+
+    } else {
+
+        hide(colorsBlock);
+    }
+}
+
+
+/* =========================================================
+   14. COULEURS
+   ========================================================= */
+
+function populateColors(
+    firstId,
+    secondId
+) {
+
+    const first =
+        $(firstId);
+
+    const second =
+        $(secondId);
+
+
+    if (!first || !second) return;
+
+
+    const options =
+        `<option value="">
+            Choisir...
+        </option>` +
+
+        COLOR_LIST
+            .map(
+                color =>
+                    `<option value="${color}">
+                        ${color}
+                    </option>`
+            )
+            .join("");
+
+
+    first.innerHTML =
+        options;
+
+    second.innerHTML =
+        options;
+}
+
+
+/* =========================================================
+   15. PRIX
+   ========================================================= */
+
+function calculateOrderPrice() {
+
+    const productId =
+        $("product-id")?.value;
+
+
+    const product =
+        PRODUCTS.find(
+            p =>
+                String(p.id) ===
+                String(productId)
+        );
+
+
+    if (!product) {
+
         return {
-            base: 0,
-            supplement: 0,
+            subtotal: 0,
+            surcharge: 0,
             discount: 0,
             total: 0,
             deposit: 0,
-            delivery: 0
+            delivery: 0,
+            quantity: 1
         };
     }
 
-    const quantityInput =
-        $("quantity");
 
     const quantity =
         Math.max(
             1,
-            parseInt(quantityInput?.value || "1")
+            parseInt(
+                $("quantity")?.value || "1"
+            )
         );
 
-    let base =
-        product.price * quantity;
 
-    let supplement = 0;
+    const subtotal =
+        Number(product.price) *
+        quantity;
 
-    const specificColor =
-        $("specific-color");
+
+    let surcharge = 0;
+
 
     if (
-        specificColor &&
-        specificColor.checked
+        $("specific-color")?.checked
     ) {
-        supplement = COLOR_SUPPLEMENT;
+
+        surcharge =
+            COLOR_SUPPLEMENT;
     }
 
-    let subtotal =
-        base + supplement;
 
     let discount = 0;
 
-    if (quantity >= BULK_DISCOUNT_MIN) {
+
+    if (
+        quantity >=
+        DISCOUNT_MIN_QUANTITY
+    ) {
+
         discount =
-            subtotal * BULK_DISCOUNT;
+            (subtotal + surcharge) *
+            DISCOUNT_RATE;
     }
+
 
     const total =
         Math.max(
             0,
-            subtotal - discount
+            subtotal +
+            surcharge -
+            discount
         );
+
 
     const deposit =
         total / 2;
 
+
     const delivery =
         total / 2;
 
+
     return {
-        quantity,
-        base,
-        supplement,
+
+        subtotal,
+        surcharge,
         discount,
         total,
         deposit,
-        delivery
+        delivery,
+        quantity
     };
 }
 
 
-/* ---------------------------------------------------------
-   8. AFFICHAGE DU PRIX
-   --------------------------------------------------------- */
-
-function updateTotal() {
+function updatePrice() {
 
     const price =
-        calculatePrice();
+        calculateOrderPrice();
 
-    if ($("price-base")) {
-        $("price-base").textContent =
-            euro(price.base);
+
+    if ($("subtotal")) {
+
+        $("subtotal").textContent =
+            money(price.subtotal);
     }
 
-    if ($("price-supplement")) {
-        $("price-supplement").textContent =
-            euro(price.supplement);
+
+    if ($("color-surcharge")) {
+
+        $("color-surcharge").textContent =
+            money(price.surcharge);
     }
 
-    if ($("price-discount")) {
-        $("price-discount").textContent =
-            "- " + euro(price.discount);
+
+    if ($("discount")) {
+
+        $("discount").textContent =
+            price.discount > 0
+                ? "- " + money(price.discount)
+                : money(0);
     }
 
-    if ($("price-total")) {
-        $("price-total").textContent =
-            euro(price.total);
+
+    if ($("total")) {
+
+        $("total").textContent =
+            money(price.total);
     }
 
-    if ($("price-deposit")) {
-        $("price-deposit").textContent =
-            euro(price.deposit);
+
+    if ($("deposit")) {
+
+        $("deposit").textContent =
+            money(price.deposit);
     }
 
-    if ($("price-delivery")) {
-        $("price-delivery").textContent =
-            euro(price.delivery);
+
+    if ($("delivery")) {
+
+        $("delivery").textContent =
+            money(price.delivery);
+    }
+
+
+    const promo =
+        $("promo-message");
+
+
+    if (promo) {
+
+        if (
+            price.quantity >=
+            DISCOUNT_MIN_QUANTITY
+        ) {
+
+            promo.textContent =
+                "🎉 Félicitations ! Vous bénéficiez de -15 %.";
+
+        } else {
+
+            promo.textContent =
+                "À partir de 5 boules : -15 % sur les boules.";
+        }
     }
 }
 
 
-/* ---------------------------------------------------------
-   9. COULEURS
-   --------------------------------------------------------- */
-
-function preventSameColors() {
-
-    const c1 = $("color-1");
-    const c2 = $("color-2");
-
-    if (!c1 || !c2) return;
-
-    Array.from(c2.options).forEach(option => {
-
-        option.disabled =
-            option.value !== "" &&
-            option.value === c1.value;
-
-    });
-
-    if (c2.value === c1.value) {
-        c2.value = "";
-    }
-}
-
-
-/* ---------------------------------------------------------
-   10. COMMANDE CLIENT
-   --------------------------------------------------------- */
+/* =========================================================
+   16. FORMULAIRE COMMANDE
+   ========================================================= */
 
 async function submitOrder(event) {
 
     event.preventDefault();
 
-    const form =
-        $("order-form");
 
-    if (!form) return;
+    const errorBox =
+        $("order-error");
+
+    hide(errorBox);
+
+
+    const productId =
+        $("product-id").value;
+
+
+    const product =
+        PRODUCTS.find(
+            p =>
+                String(p.id) ===
+                String(productId)
+        );
+
+
+    if (!product) {
+
+        showOrderError(
+            "Veuillez sélectionner un modèle."
+        );
+
+        return;
+    }
+
+
+    /*
+       Vérification des couleurs
+    */
+
+    if (product.two_colors) {
+
+        const color1 =
+            $("color-1").value;
+
+        const color2 =
+            $("color-2").value;
+
+
+        if (!color1 || !color2) {
+
+            showOrderError(
+                "Veuillez choisir vos deux couleurs."
+            );
+
+            return;
+        }
+
+
+        if (color1 === color2) {
+
+            showOrderError(
+                "Les deux couleurs doivent être différentes."
+            );
+
+            return;
+        }
+    }
+
+
+    /*
+       Vérification personnalisation
+    */
+
+    if (product.customizable) {
+
+        if (
+            !$("personalization-name").value.trim()
+        ) {
+
+            showOrderError(
+                "Veuillez indiquer le prénom à inscrire."
+            );
+
+            return;
+        }
+
+
+        if (
+            product.has_year &&
+            !$("personalization-year").value
+        ) {
+
+            showOrderError(
+                "Veuillez indiquer l'année."
+            );
+
+            return;
+        }
+    }
+
+
+    const price =
+        calculateOrderPrice();
+
 
     const button =
-        form.querySelector("button[type='submit']");
+        $("order-submit");
 
-    if (button) {
-        button.disabled = true;
-        button.textContent = "Enregistrement...";
-    }
+
+    button.disabled = true;
+
+    button.textContent =
+        "Enregistrement...";
+
 
     try {
 
-        const productKey =
-            $("model")?.value;
-
-        const product =
-            PRODUCTS[productKey];
-
-        if (!product) {
-            throw new Error(
-                "Veuillez sélectionner un modèle."
-            );
-        }
-
-        const price =
-            calculatePrice();
-
-        const specificColor =
-            $("specific-color")?.checked || false;
-
         const data = {
 
-            customer_name:
-                $("customer-name")?.value.trim(),
-
             customer_first_name:
-                $("customer-first-name")?.value.trim(),
+                $("first-name").value.trim(),
+
+            customer_name:
+                $("last-name").value.trim(),
 
             address:
-                $("address")?.value.trim(),
+                $("street").value.trim(),
 
             city:
-                $("city")?.value.trim(),
+                $("city").value.trim(),
 
             address_complement:
-                $("address-complement")?.value.trim(),
+                $("complement").value.trim() ||
+                null,
 
             email:
-                $("email")?.value.trim(),
+                $("email").value.trim(),
 
             phone:
-                $("phone")?.value.trim(),
+                $("phone").value.trim() ||
+                null,
+
 
             model:
                 product.name,
 
             model_key:
-                productKey,
+                product.product_key,
+
 
             custom_first_name:
-                $("custom-first-name")?.value.trim() || null,
+                product.customizable
+                    ? $("personalization-name").value.trim()
+                    : null,
+
 
             custom_year:
-                $("custom-year")?.value || null,
+                product.has_year
+                    ? $("personalization-year").value
+                    : null,
+
 
             color_1:
-                $("color-1")?.value || null,
+                product.two_colors
+                    ? $("color-1").value
+                    : null,
+
 
             color_2:
-                $("color-2")?.value || null,
+                product.two_colors
+                    ? $("color-2").value
+                    : null,
+
 
             quantity:
                 price.quantity,
 
+
             specific_color:
-                specificColor,
+                $("specific-color").checked,
+
 
             color_supplement:
-                price.supplement,
+                price.surcharge,
+
 
             base_price:
-                price.base,
+                price.subtotal,
+
 
             discount:
                 price.discount,
 
+
             total_price:
                 price.total,
+
 
             deposit_price:
                 price.deposit,
 
+
             delivery_price:
                 price.delivery,
+
 
             status:
                 "pending"
         };
 
 
-        const { data: result, error } =
+        const {
+            data: order,
+            error
+        } =
             await supabaseClient
                 .from("orders")
                 .insert(data)
@@ -568,139 +1177,151 @@ async function submitOrder(event) {
 
 
         if (error) {
+
             console.error(error);
+
             throw error;
         }
 
 
-        showOrderSuccess(result);
+        /*
+           Afficher le succès
+        */
+
+        $("success-number").textContent =
+            order.order_number;
 
 
-        form.reset();
+        show("order-success");
 
-        hide($("personalization-options"));
-        hide($("color-options"));
 
-        updateTotal();
+        $("order-success")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+
+
+        /*
+           Réinitialiser
+        */
+
+        $("order-form").reset();
+
+        $("product-id").value = "";
+
+        document
+            .querySelectorAll(
+                "#order-product-grid .choice-card"
+            )
+            .forEach(card => {
+
+                card.classList.remove(
+                    "selected"
+                );
+            });
+
+
+        hide("order-design-block");
+        hide("order-personalization-block");
+        hide("order-colors-block");
+
+
+        updatePrice();
+
 
     } catch (error) {
 
-        console.error(
-            "Erreur commande :",
-            error
-        );
-
-        alert(
-            "Impossible d'enregistrer la commande.\n\n" +
+        showOrderError(
+            "Impossible d'enregistrer la commande : " +
             error.message
         );
 
     } finally {
 
-        if (button) {
-            button.disabled = false;
-            button.textContent =
-                "Valider la commande";
-        }
+        button.disabled = false;
+
+        button.textContent =
+            "Valider la commande";
     }
 }
 
 
-/* ---------------------------------------------------------
-   11. SUCCÈS
-   --------------------------------------------------------- */
+function showOrderError(message) {
 
-function showOrderSuccess(order) {
+    const box =
+        $("order-error");
 
-    const success =
-        $("order-success");
+    if (!box) {
 
-    if (!success) {
-        alert(
-            "Commande reçue ! Numéro : " +
-            order.order_number
-        );
+        alert(message);
 
         return;
     }
 
-    const number =
-        $("success-order-number");
 
-    const total =
-        $("success-total");
+    box.textContent =
+        message;
 
-    const deposit =
-        $("success-deposit");
-
-    const delivery =
-        $("success-delivery");
-
-    if (number) {
-        number.textContent =
-            order.order_number;
-    }
-
-    if (total) {
-        total.textContent =
-            euro(order.total_price);
-    }
-
-    if (deposit) {
-        deposit.textContent =
-            euro(order.deposit_price);
-    }
-
-    if (delivery) {
-        delivery.textContent =
-            euro(order.delivery_price);
-    }
-
-    show(success);
-
-    success.scrollIntoView({
-        behavior: "smooth"
-    });
+    show(box);
 }
 
 
-/* ---------------------------------------------------------
-   12. SUIVI DE COMMANDE
-   --------------------------------------------------------- */
+/* =========================================================
+   17. SUIVI COMMANDE
+   ========================================================= */
 
 async function trackOrder() {
 
     const input =
         $("tracking-number");
 
+    const loading =
+        $("tracking-loading");
+
+    const errorBox =
+        $("tracking-error");
+
     const result =
         $("tracking-result");
 
-    if (!input || !result) return;
+
+    hide(errorBox);
+    hide(result);
+
 
     let number =
         input.value.trim().toUpperCase();
 
+
     if (!number) {
-        alert(
-            "Entrez votre numéro de commande."
-        );
+
+        errorBox.textContent =
+            "Entrez votre numéro de commande.";
+
+        show(errorBox);
 
         return;
     }
 
+
     if (!number.startsWith("#")) {
-        number = "#" + number;
+
+        number =
+            "#" + number;
     }
 
-    result.innerHTML =
-        "Recherche en cours...";
 
-    const { data, error } =
+    show(loading);
+
+
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("orders")
             .select(
-                "order_number,status,model,total_price"
+                "order_number,status"
             )
             .eq(
                 "order_number",
@@ -708,153 +1329,181 @@ async function trackOrder() {
             )
             .maybeSingle();
 
+
+    hide(loading);
+
+
     if (error) {
 
         console.error(error);
 
-        result.innerHTML =
-            "<p>Une erreur est survenue.</p>";
+        errorBox.textContent =
+            error.message;
+
+        show(errorBox);
 
         return;
     }
+
 
     if (!data) {
 
-        result.innerHTML =
-            "<p>❌ Commande introuvable.</p>";
+        errorBox.textContent =
+            "Commande introuvable.";
+
+        show(errorBox);
 
         return;
     }
+
 
     const statuses = {
 
         pending: {
             icon: "🔴",
-            title: "En attente de passage",
-            text:
-                "Nous allons passer chez vous valider le modèle et récupérer les espèces.",
-            className: "status-red"
+            title:
+                "En attente de validation / passage",
+            description:
+                "Nous allons passer chez vous valider le modèle et récupérer les espèces."
         },
 
         manufacturing: {
             icon: "🟡",
-            title: "En cours de fabrication",
-            text:
-                "L'impression 3D est lancée !",
-            className: "status-yellow"
+            title:
+                "En cours de fabrication",
+            description:
+                "L'impression 3D est lancée !"
         },
 
         ready: {
             icon: "🟢",
-            title: "Prête pour la livraison !",
-            text:
-                "Nous repassons chez vous vous apporter votre boule.",
-            className: "status-green"
+            title:
+                "Prête pour la livraison !",
+            description:
+                "Nous repassons chez vous vous apporter votre boule."
         },
 
         delivered: {
             icon: "⚫",
-            title: "Livrée",
-            text:
-                "Commande terminée.",
-            className: "status-black"
+            title:
+                "Livrée",
+            description:
+                "Commande terminée."
         }
     };
+
 
     const status =
         statuses[data.status] ||
         statuses.pending;
 
-    result.innerHTML = `
 
-        <div class="tracking-status ${status.className}">
+    $("tracking-icon").textContent =
+        status.icon;
 
-            <div class="tracking-icon">
-                ${status.icon}
-            </div>
 
-            <h3>
-                ${status.title}
-            </h3>
+    $("tracking-order-number").textContent =
+        data.order_number;
 
-            <p>
-                ${status.text}
-            </p>
 
-            <strong>
-                ${data.order_number}
-            </strong>
+    $("tracking-title").textContent =
+        status.title;
 
-        </div>
-    `;
+
+    $("tracking-description").textContent =
+        status.description;
+
+
+    show(result);
 }
 
 
-/* ---------------------------------------------------------
-   13. ADMINISTRATION
-   --------------------------------------------------------- */
+/* =========================================================
+   18. ADMIN LOGIN
+   ========================================================= */
 
 async function adminLogin() {
 
     const email =
-        $("admin-email")?.value.trim();
+        $("admin-email").value.trim();
 
     const password =
-        $("admin-password")?.value;
+        $("admin-password").value;
+
 
     const errorBox =
         $("admin-login-error");
 
+
     hide(errorBox);
 
-    if (!email || !password) {
 
-        if (errorBox) {
-            errorBox.textContent =
-                "Veuillez remplir tous les champs.";
-            show(errorBox);
-        }
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth
+            .signInWithPassword({
+                email,
+                password
+            });
 
-        return;
-    }
-
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-        });
 
     if (error) {
 
         console.error(error);
 
-        if (errorBox) {
+        errorBox.textContent =
+            "E-mail ou mot de passe incorrect.";
 
-            errorBox.textContent =
-                "E-mail ou mot de passe incorrect.";
-
-            show(errorBox);
-        }
+        show(errorBox);
 
         return;
     }
 
+
     console.log(
-        "Connexion admin réussie",
-        data.user
+        "Admin connecté :",
+        data.user.email
     );
 
-    showPage("admin-dashboard");
 
-    await loadAdminOrders();
+    showPage("admin");
+
+    await loadOrders();
 }
 
 
-/* ---------------------------------------------------------
-   14. DÉCONNEXION ADMIN
-   --------------------------------------------------------- */
+/* =========================================================
+   19. VÉRIFICATION ADMIN
+   ========================================================= */
 
-async function adminLogout() {
+async function checkAdminSession() {
+
+    const {
+        data
+    } =
+        await supabaseClient.auth
+            .getSession();
+
+
+    if (!data.session) {
+
+        showPage("admin-login");
+
+        return false;
+    }
+
+
+    return true;
+}
+
+
+/* =========================================================
+   20. DÉCONNEXION
+   ========================================================= */
+
+async function logoutAdmin() {
 
     await supabaseClient.auth.signOut();
 
@@ -862,23 +1511,27 @@ async function adminLogout() {
 }
 
 
-/* ---------------------------------------------------------
-   15. CHARGEMENT DES COMMANDES ADMIN
-   --------------------------------------------------------- */
+/* =========================================================
+   21. COMMANDES ADMIN
+   ========================================================= */
 
-async function loadAdminOrders() {
+async function loadOrders() {
 
     const table =
-        $("admin-orders-body");
+        $("orders-table");
+
 
     if (!table) return;
 
-    table.innerHTML =
-        `<tr>
-            <td colspan="10">
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="8">
                 Chargement...
             </td>
-        </tr>`;
+        </tr>
+    `;
+
 
     const {
         data,
@@ -894,38 +1547,65 @@ async function loadAdminOrders() {
                 }
             );
 
+
     if (error) {
 
         console.error(error);
 
-        table.innerHTML =
-            `<tr>
-                <td colspan="10">
-                    Erreur : ${error.message}
+        table.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    ${error.message}
                 </td>
-            </tr>`;
+            </tr>
+        `;
 
         return;
     }
 
-    if (!data || data.length === 0) {
 
-        table.innerHTML =
-            `<tr>
-                <td colspan="10">
+    if (!data.length) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="8">
                     Aucune commande.
                 </td>
-            </tr>`;
+            </tr>
+        `;
+
+        updateStats([]);
 
         return;
     }
 
+
     table.innerHTML = "";
+
 
     data.forEach(order => {
 
         const row =
             document.createElement("tr");
+
+
+        const personalization =
+            [
+                order.custom_first_name,
+                order.custom_year
+            ]
+            .filter(Boolean)
+            .join(" / ") || "—";
+
+
+        const colors =
+            [
+                order.color_1,
+                order.color_2
+            ]
+            .filter(Boolean)
+            .join(" / ") || "—";
+
 
         row.innerHTML = `
 
@@ -938,6 +1618,10 @@ async function loadAdminOrders() {
             <td>
                 ${order.customer_first_name || ""}
                 ${order.customer_name || ""}
+                <br>
+                <small>
+                    ${order.email || ""}
+                </small>
             </td>
 
             <td>
@@ -951,44 +1635,55 @@ async function loadAdminOrders() {
             </td>
 
             <td>
-                ${order.custom_first_name || "-"}
+                ${personalization}
             </td>
 
             <td>
-                ${order.custom_year || "-"}
+                ${colors}
             </td>
 
             <td>
-                ${order.quantity || 1}
-            </td>
-
-            <td>
-                ${euro(order.total_price)}
+                <strong>
+                    ${money(order.total_price)}
+                </strong>
             </td>
 
             <td>
 
                 <select
-                    onchange="changeOrderStatus('${order.id}', this.value)"
+                    onchange="
+                        changeOrderStatus(
+                            '${order.id}',
+                            this.value
+                        )
+                    "
                 >
 
-                    <option value="pending"
-                        ${order.status === "pending" ? "selected" : ""}>
+                    <option
+                        value="pending"
+                        ${order.status === "pending" ? "selected" : ""}
+                    >
                         🔴 En attente
                     </option>
 
-                    <option value="manufacturing"
-                        ${order.status === "manufacturing" ? "selected" : ""}>
+                    <option
+                        value="manufacturing"
+                        ${order.status === "manufacturing" ? "selected" : ""}
+                    >
                         🟡 Fabrication
                     </option>
 
-                    <option value="ready"
-                        ${order.status === "ready" ? "selected" : ""}>
+                    <option
+                        value="ready"
+                        ${order.status === "ready" ? "selected" : ""}
+                    >
                         🟢 Prête
                     </option>
 
-                    <option value="delivered"
-                        ${order.status === "delivered" ? "selected" : ""}>
+                    <option
+                        value="delivered"
+                        ${order.status === "delivered" ? "selected" : ""}
+                    >
                         ⚫ Livrée
                     </option>
 
@@ -998,18 +1693,89 @@ async function loadAdminOrders() {
 
         `;
 
+
         table.appendChild(row);
     });
+
+
+    updateStats(data);
 }
 
 
-/* ---------------------------------------------------------
-   16. CHANGEMENT DE STATUT
-   --------------------------------------------------------- */
+/* =========================================================
+   22. STATISTIQUES ADMIN
+   ========================================================= */
+
+function updateStats(orders) {
+
+    const total =
+        orders.length;
+
+
+    const pending =
+        orders.filter(
+            o => o.status === "pending"
+        ).length;
+
+
+    const production =
+        orders.filter(
+            o =>
+                o.status === "manufacturing"
+        ).length;
+
+
+    const ready =
+        orders.filter(
+            o =>
+                o.status === "ready"
+        ).length;
+
+
+    const revenue =
+        orders.reduce(
+            (sum, order) =>
+                sum +
+                Number(
+                    order.total_price || 0
+                ),
+            0
+        );
+
+
+    if ($("stat-total"))
+        $("stat-total").textContent =
+            total;
+
+
+    if ($("stat-pending"))
+        $("stat-pending").textContent =
+            pending;
+
+
+    if ($("stat-production"))
+        $("stat-production").textContent =
+            production;
+
+
+    if ($("stat-ready"))
+        $("stat-ready").textContent =
+            ready;
+
+
+    if ($("stat-revenue"))
+        $("stat-revenue").textContent =
+            money(revenue);
+}
+
+
+/* =========================================================
+   23. MODIFICATION STATUT
+   ========================================================= */
 
 async function changeOrderStatus(
     orderId,
-    newStatus
+    status
 ) {
 
     const {
@@ -1018,12 +1784,13 @@ async function changeOrderStatus(
         await supabaseClient
             .from("orders")
             .update({
-                status: newStatus
+                status: status
             })
             .eq(
                 "id",
                 orderId
             );
+
 
     if (error) {
 
@@ -1037,88 +1804,437 @@ async function changeOrderStatus(
         return;
     }
 
-    console.log(
-        "Statut modifié"
-    );
+
+    await loadOrders();
 }
 
 
-/* ---------------------------------------------------------
-   17. INITIALISATION
-   --------------------------------------------------------- */
+/* =========================================================
+   24. COMMANDES MANUELLES
+   ========================================================= */
+
+function renderManualProducts() {
+
+    const container =
+        $("manual-product-grid");
+
+
+    if (!container) return;
+
+
+    container.innerHTML = "";
+
+
+    PRODUCTS.forEach(product => {
+
+        const button =
+            document.createElement("button");
+
+
+        button.type = "button";
+
+        button.className =
+            "choice-card";
+
+
+        button.dataset.productId =
+            product.id;
+
+
+        button.innerHTML = `
+
+            <div>
+
+                <strong>
+                    ${product.name}
+                </strong>
+
+                <span>
+                    ${money(product.price)}
+                </span>
+
+            </div>
+
+        `;
+
+
+        button.onclick = () => {
+
+            selectManualProduct(
+                product.id
+            );
+        };
+
+
+        container.appendChild(button);
+    });
+}
+
+
+function selectManualProduct(productId) {
+
+    const product =
+        PRODUCTS.find(
+            p =>
+                String(p.id) ===
+                String(productId)
+        );
+
+
+    if (!product) return;
+
+
+    $("manual-product-id").value =
+        product.id;
+
+
+    document
+        .querySelectorAll(
+            "#manual-product-grid .choice-card"
+        )
+        .forEach(card => {
+
+            card.classList.toggle(
+                "selected",
+                String(
+                    card.dataset.productId
+                ) === String(product.id)
+            );
+        });
+
+
+    if (product.customizable) {
+
+        show("manual-personalization-block");
+
+    } else {
+
+        hide("manual-personalization-block");
+    }
+
+
+    if (product.two_colors) {
+
+        show("manual-colors-block");
+
+        populateColors(
+            "manual-color-1",
+            "manual-color-2"
+        );
+
+    } else {
+
+        hide("manual-colors-block");
+    }
+
+
+    updateManualPrice();
+}
+
+
+function updateManualPrice() {
+
+    const product =
+        PRODUCTS.find(
+            p =>
+                String(p.id) ===
+                String(
+                    $("manual-product-id")?.value
+                )
+        );
+
+
+    if (!product) {
+
+        $("manual-price").textContent =
+            "";
+
+        return;
+    }
+
+
+    const quantity =
+        Math.max(
+            1,
+            parseInt(
+                $("manual-quantity").value ||
+                "1"
+            )
+        );
+
+
+    let total =
+        Number(product.price) *
+        quantity;
+
+
+    if (
+        $("manual-specific-color")?.checked
+    ) {
+
+        total +=
+            COLOR_SUPPLEMENT;
+    }
+
+
+    if (
+        quantity >=
+        DISCOUNT_MIN_QUANTITY
+    ) {
+
+        total *=
+            1 - DISCOUNT_RATE;
+    }
+
+
+    $("manual-price").innerHTML = `
+
+        <strong>
+            Total : ${money(total)}
+        </strong>
+
+        <span>
+            Passage : ${money(total / 2)}
+        </span>
+
+        <span>
+            Livraison : ${money(total / 2)}
+        </span>
+
+    `;
+}
+
+
+function openManualOrder() {
+
+    show("manual-modal");
+
+    renderManualProducts();
+}
+
+
+function closeManualOrder() {
+
+    hide("manual-modal");
+}
+
+
+/* =========================================================
+   25. FORMULAIRE MANUEL
+   ========================================================= */
+
+async function submitManualOrder(event) {
+
+    event.preventDefault();
+
+
+    const product =
+        PRODUCTS.find(
+            p =>
+                String(p.id) ===
+                String(
+                    $("manual-product-id").value
+                )
+        );
+
+
+    if (!product) {
+
+        alert(
+            "Choisissez un modèle."
+        );
+
+        return;
+    }
+
+
+    const quantity =
+        Math.max(
+            1,
+            parseInt(
+                $("manual-quantity").value ||
+                "1"
+            )
+        );
+
+
+    let subtotal =
+        Number(product.price) *
+        quantity;
+
+
+    let surcharge = 0;
+
+
+    if (
+        $("manual-specific-color")?.checked
+    ) {
+
+        surcharge =
+            COLOR_SUPPLEMENT;
+    }
+
+
+    let discount = 0;
+
+
+    if (
+        quantity >=
+        DISCOUNT_MIN_QUANTITY
+    ) {
+
+        discount =
+            (subtotal + surcharge) *
+            DISCOUNT_RATE;
+    }
+
+
+    const total =
+        subtotal +
+        surcharge -
+        discount;
+
+
+    const data = {
+
+        customer_first_name:
+            $("manual-first-name").value.trim(),
+
+        customer_name:
+            $("manual-last-name").value.trim(),
+
+        address:
+            $("manual-street").value.trim(),
+
+        city:
+            $("manual-city").value.trim(),
+
+        address_complement:
+            $("manual-complement").value.trim() ||
+            null,
+
+        email:
+            $("manual-email").value.trim(),
+
+        phone:
+            $("manual-phone").value.trim() ||
+            null,
+
+        model:
+            product.name,
+
+        model_key:
+            product.product_key,
+
+        custom_first_name:
+            $("manual-personalization-name")
+                ?.value.trim() || null,
+
+        custom_year:
+            $("manual-personalization-year")
+                ?.value || null,
+
+        color_1:
+            product.two_colors
+                ? $("manual-color-1").value
+                : null,
+
+        color_2:
+            product.two_colors
+                ? $("manual-color-2").value
+                : null,
+
+        quantity,
+
+        specific_color:
+            $("manual-specific-color").checked,
+
+        color_supplement:
+            surcharge,
+
+        base_price:
+            subtotal,
+
+        discount,
+
+        total_price:
+            total,
+
+        deposit_price:
+            total / 2,
+
+        delivery_price:
+            total / 2,
+
+        status:
+            "pending"
+    };
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("orders")
+            .insert(data);
+
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Erreur : " +
+            error.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Commande créée avec succès !"
+    );
+
+
+    closeManualOrder();
+
+    $("manual-form").reset();
+
+    await loadOrders();
+}
+
+
+/* =========================================================
+   26. INITIALISATION
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
         console.log(
-            "🎄 L'Atelier de Noël 3D chargé"
+            "🎄 L'Atelier de Noël 3D"
         );
 
 
-        createSnowflakes();
+        createSnow();
 
 
-        /* Modèle */
+        /*
+           Charger les produits
+        */
 
-        const model =
-            $("model");
-
-        if (model) {
-
-            model.addEventListener(
-                "change",
-                updateProductOptions
-            );
-        }
+        await loadProducts();
 
 
-        /* Quantité */
-
-        const quantity =
-            $("quantity");
-
-        if (quantity) {
-
-            quantity.addEventListener(
-                "input",
-                updateTotal
-            );
-        }
-
-
-        /* Supplément couleur */
-
-        const specificColor =
-            $("specific-color");
-
-        if (specificColor) {
-
-            specificColor.addEventListener(
-                "change",
-                updateTotal
-            );
-        }
-
-
-        /* Couleurs */
-
-        const color1 =
-            $("color-1");
-
-        if (color1) {
-
-            color1.addEventListener(
-                "change",
-                preventSameColors
-            );
-        }
-
-
-        /* Formulaire */
+        /*
+           Formulaire commande
+        */
 
         const orderForm =
             $("order-form");
+
 
         if (orderForm) {
 
@@ -1129,38 +2245,137 @@ document.addEventListener(
         }
 
 
-        /* Vérifier session admin */
+        /*
+           Quantité
+        */
 
-        const {
-            data: {
-                session
-            }
-        } =
-            await supabaseClient.auth.getSession();
+        if ($("quantity")) {
 
-        if (session) {
+            $("quantity")
+                .addEventListener(
+                    "input",
+                    updatePrice
+                );
+        }
 
-            console.log(
-                "Session administrateur active"
+
+        /*
+           Supplément couleur
+        */
+
+        if ($("specific-color")) {
+
+            $("specific-color")
+                .addEventListener(
+                    "change",
+                    updatePrice
+                );
+        }
+
+
+        /*
+           Couleurs
+        */
+
+        if ($("color-1")) {
+
+            $("color-1")
+                .addEventListener(
+                    "change",
+                    () => {
+
+                        const color2 =
+                            $("color-2");
+
+                        if (
+                            color2 &&
+                            color2.value ===
+                            $("color-1").value
+                        ) {
+
+                            color2.value = "";
+                        }
+                    }
+                );
+        }
+
+
+        /*
+           Formulaire manuel
+        */
+
+        const manualForm =
+            $("manual-form");
+
+
+        if (manualForm) {
+
+            manualForm.addEventListener(
+                "submit",
+                submitManualOrder
             );
         }
 
 
-        updateTotal();
+        if ($("manual-quantity")) {
 
+            $("manual-quantity")
+                .addEventListener(
+                    "input",
+                    updateManualPrice
+                );
+        }
+
+
+        if ($("manual-specific-color")) {
+
+            $("manual-specific-color")
+                .addEventListener(
+                    "change",
+                    updateManualPrice
+                );
+        }
+
+
+        updatePrice();
+
+        console.log(
+            "✅ Site prêt"
+        );
     }
 );
 
 
-/* ---------------------------------------------------------
-   18. FONCTIONS DISPONIBLES DANS LE HTML
-   --------------------------------------------------------- */
+/* =========================================================
+   27. FONCTIONS ACCESSIBLES AU HTML
+   ========================================================= */
 
-window.showPage = showPage;
-window.adminLogin = adminLogin;
-window.adminLogout = adminLogout;
-window.trackOrder = trackOrder;
-window.changeOrderStatus = changeOrderStatus;
-window.loadAdminOrders = loadAdminOrders;
-window.updateProductOptions = updateProductOptions;
-window.updateTotal = updateTotal;
+window.showPage =
+    showPage;
+
+window.chooseProduct =
+    chooseProduct;
+
+window.selectOrderProduct =
+    selectOrderProduct;
+
+window.trackOrder =
+    trackOrder;
+
+window.adminLogin =
+    adminLogin;
+
+window.logoutAdmin =
+    logoutAdmin;
+
+window.loadOrders =
+    loadOrders;
+
+window.changeOrderStatus =
+    changeOrderStatus;
+
+window.openManualOrder =
+    openManualOrder;
+
+window.closeManualOrder =
+    closeManualOrder;
