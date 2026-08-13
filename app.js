@@ -12,7 +12,7 @@ const SUPABASE_URL = "https://sdqtgluhgywedjwgolei.supabase.co";
 
 // ⚠️ COLLE ICI TA CLÉ "Publishable key"
 // Elle commence par : sb_publishable_
-const SUPABASE_PUBLISHABLE_KEY = "COLLE_TA_CLE_ICI";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zY7V5CoRa2mYRYhZdm8v7Q_lc5U1Lm_";
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
