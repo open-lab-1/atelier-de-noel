@@ -45,7 +45,6 @@ const COLOR_LIST = [
     "Argent"
 ];
 
-const COLOR_SUPPLEMENT = 7;
 const DISCOUNT_MIN_QUANTITY = 5;
 const DISCOUNT_RATE = 0.15;
 
@@ -854,17 +853,7 @@ function calculateOrderPrice() {
         Number(product.price) *
         quantity;
 
-
-    let surcharge = 0;
-
-
-    if (
-        $("specific-color")?.checked
-    ) {
-
-        surcharge =
-            COLOR_SUPPLEMENT;
-    }
+    const surcharge = 0;
 
 
     let discount = 0;
@@ -876,7 +865,7 @@ function calculateOrderPrice() {
     ) {
 
         discount =
-            (subtotal + surcharge) *
+            subtotal *
             DISCOUNT_RATE;
     }
 
@@ -889,16 +878,9 @@ function calculateOrderPrice() {
             discount
         );
 
-
-    const deposit =
-        total / 2;
-
-
-    const delivery =
-        total / 2;
-
-
-    return {
+    const deposit = 0;
+    const delivery = total;
+return {
 
         subtotal,
         surcharge,
@@ -922,16 +904,7 @@ function updatePrice() {
         $("subtotal").textContent =
             money(price.subtotal);
     }
-
-
-    if ($("color-surcharge")) {
-
-        $("color-surcharge").textContent =
-            money(price.surcharge);
-    }
-
-
-    if ($("discount")) {
+if ($("discount")) {
 
         $("discount").textContent =
             price.discount > 0
@@ -945,23 +918,7 @@ function updatePrice() {
         $("total").textContent =
             money(price.total);
     }
-
-
-    if ($("deposit")) {
-
-        $("deposit").textContent =
-            money(price.deposit);
-    }
-
-
-    if ($("delivery")) {
-
-        $("delivery").textContent =
-            money(price.delivery);
-    }
-
-
-    const promo =
+const promo =
         $("promo-message");
 
 
@@ -1108,6 +1065,9 @@ async function submitOrder(event) {
             customer_first_name:
                 $("first-name").value.trim(),
 
+            customer_last_name:
+                $("last-name").value.trim(),
+
             customer_name:
                 $("last-name").value.trim(),
 
@@ -1162,17 +1122,7 @@ async function submitOrder(event) {
 
             quantity:
                 price.quantity,
-
-
-            specific_color:
-                $("specific-color").checked,
-
-
-            color_supplement:
-                price.surcharge,
-
-
-            base_price:
+base_price:
                 price.subtotal,
 
 
@@ -1185,11 +1135,10 @@ async function submitOrder(event) {
 
 
             deposit_price:
-                price.deposit,
-
+                0,
 
             delivery_price:
-                price.delivery,
+                price.total,
 
 
             status:
@@ -1649,7 +1598,7 @@ async function loadOrders() {
 
             <td>
                 ${order.customer_first_name || ""}
-                ${order.customer_name || ""}
+                ${order.customer_last_name || order.customer_name || ""}
                 <br>
                 <small>
                     ${order.email || ""}
@@ -1998,18 +1947,7 @@ function updateManualPrice() {
     let total =
         Number(product.price) *
         quantity;
-
-
-    if (
-        $("manual-specific-color")?.checked
-    ) {
-
-        total +=
-            COLOR_SUPPLEMENT;
-    }
-
-
-    if (
+if (
         quantity >=
         DISCOUNT_MIN_QUANTITY
     ) {
@@ -2019,21 +1957,7 @@ function updateManualPrice() {
     }
 
 
-    $("manual-price").innerHTML = `
-
-        <strong>
-            Total : ${money(total)}
-        </strong>
-
-        <span>
-            Passage : ${money(total / 2)}
-        </span>
-
-        <span>
-            Livraison : ${money(total / 2)}
-        </span>
-
-    `;
+    $("manual-price").innerHTML = `<strong>Total final : ${money(total)}</strong>`;
 }
 
 
@@ -2095,16 +2019,7 @@ async function submitManualOrder(event) {
         quantity;
 
 
-    let surcharge = 0;
-
-
-    if (
-        $("manual-specific-color")?.checked
-    ) {
-
-        surcharge =
-            COLOR_SUPPLEMENT;
-    }
+    const surcharge = 0;
 
 
     let discount = 0;
@@ -2116,7 +2031,7 @@ async function submitManualOrder(event) {
     ) {
 
         discount =
-            (subtotal + surcharge) *
+            subtotal *
             DISCOUNT_RATE;
     }
 
@@ -2131,6 +2046,9 @@ async function submitManualOrder(event) {
 
         customer_first_name:
             $("manual-first-name").value.trim(),
+
+        customer_last_name:
+            $("manual-last-name").value.trim(),
 
         customer_name:
             $("manual-last-name").value.trim(),
@@ -2177,14 +2095,7 @@ async function submitManualOrder(event) {
                 : null,
 
         quantity,
-
-        specific_color:
-            $("manual-specific-color").checked,
-
-        color_supplement:
-            surcharge,
-
-        base_price:
+base_price:
             subtotal,
 
         discount,
@@ -2193,10 +2104,10 @@ async function submitManualOrder(event) {
             total,
 
         deposit_price:
-            total / 2,
+            0,
 
         delivery_price:
-            total / 2,
+            total,
 
         status:
             "pending"
@@ -2289,23 +2200,7 @@ document.addEventListener(
                     updatePrice
                 );
         }
-
-
-        /*
-           Supplément couleur
-        */
-
-        if ($("specific-color")) {
-
-            $("specific-color")
-                .addEventListener(
-                    "change",
-                    updatePrice
-                );
-        }
-
-
-        /*
+/*
            Couleurs
         */
 
@@ -2357,19 +2252,7 @@ document.addEventListener(
                     updateManualPrice
                 );
         }
-
-
-        if ($("manual-specific-color")) {
-
-            $("manual-specific-color")
-                .addEventListener(
-                    "change",
-                    updateManualPrice
-                );
-        }
-
-
-        updatePrice();
+updatePrice();
 
         console.log(
             "✅ Site prêt"
