@@ -1095,17 +1095,18 @@ async function submitOrder(event) {
 
         const data = {
 
-            customer_first_name:
-                $("first-name").value.trim(),
+customer_first_name:
+    $("first-name").value.trim(),
 
-            customer_name:
-                $("last-name").value.trim(),
+customer_last_name:
+    $("last-name").value.trim(),
 
-            address:
-                $("street").value.trim(),
+street:
+    $("street").value.trim(),
 
-            city:
-                $("city").value.trim(),
+city:
+    $("city").value.trim(),
+
 
             address_complement:
                 $("complement").value.trim() ||
