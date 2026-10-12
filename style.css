@@ -34,3 +34,33 @@ html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#fff
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: start;
 }
+
+/* CORRECTIF DEFINITIF — images des produits */
+.product-grid {
+  align-items: start;
+}
+
+.product-card {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
+
+.product-card > .product-image {
+  display: block;
+  width: 100%;
+  height: 220px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Images des choix dans le formulaire */
+.choice-card .product-image {
+  width: 120px;
+  height: 120px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+}
