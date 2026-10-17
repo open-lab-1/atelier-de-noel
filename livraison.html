@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Organisons votre livraison — L'Atelier de Noël 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--cream:#fffaf1;--red:#a51f2b;--red-dark:#7f1620;--green:#14553a;--gold:#c69b3c;--ink:#26302b;--muted:#6c756f;--line:#e8e0d2;--shadow:0 18px 55px rgba(56,38,20,.10)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top left,#fff 0,#fffaf1 45%,#f6efe1 100%);color:var(--ink);font:16px/1.55 Arial,sans-serif;padding:24px}
+    main{max-width:760px;margin:28px auto 60px}.brand{text-align:center;color:var(--green);font:600 1rem Fredoka,Arial,sans-serif;letter-spacing:.06em}.brand-mark{width:60px;height:60px;margin:0 auto 10px;border:2px solid var(--gold);border-radius:50%;display:grid;place-items:center;background:white;color:var(--red);font:600 .65rem Fredoka,Arial,sans-serif;letter-spacing:.04em}
+    .card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,36px);box-shadow:var(--shadow);margin-top:22px}h1,h2,h3,button{font-family:Fredoka,Arial,sans-serif}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.06;color:var(--green-dark);text-align:center;margin:.2em 0 .45em}h2{font-size:1.35rem;margin:0 0 12px}p{line-height:1.6}.lead{text-align:center;color:var(--muted);max-width:560px;margin:0 auto 18px}.eyebrow{text-align:center;color:var(--red);letter-spacing:.16em;font:bold .75rem Arial,sans-serif}
+    .message{padding:14px 16px;border-radius:12px;margin:16px 0;background:#f5f2eb;border:1px solid var(--line)}.message.error{background:#fff0f0;border-color:#efc9c9;color:#8d1c1c}.message.success{background:#eef8f0;border-color:#c9e6d0;color:#14553a}.hidden{display:none!important}
+    .dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.date-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fffdf9}.date-card h3{font-size:1.05rem;margin:0 0 10px;color:var(--green-dark);text-transform:capitalize}.period{display:flex;gap:9px;align-items:center;padding:8px 2px;cursor:pointer}.period input{width:18px;height:18px;accent-color:var(--green)}label{font-weight:600}.comment-label{display:block;margin:22px 0 7px}.comment-hint{display:block;color:var(--muted);font-size:.85rem;margin:.35rem 0 .6rem}textarea{width:100%;min-height:100px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:#fff}button{border:0;border-radius:12px;padding:13px 18px;cursor:pointer;font-weight:600}.primary{width:100%;margin-top:20px;background:var(--red);color:#fff}.primary:hover{background:var(--red-dark)}button:disabled{opacity:.55;cursor:wait}.muted{color:var(--muted);text-align:center}.order-number{color:var(--red);font-weight:bold}.footer{text-align:center;color:var(--muted);font-size:.88rem;margin-top:20px}
+    @media(max-width:540px){body{padding:14px}.dates{grid-template-columns:1fr}.card{border-radius:18px;padding:18px}.brand-mark{width:54px;height:54px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="brand-mark">ST-WITZ</div>L'ATELIER DE NOËL 3D</div>
+  <section class="card">
+    <p class="eyebrow">ORGANISONS VOTRE LIVRAISON</p>
+    <h1>Quand êtes-vous disponible ?</h1>
+    <p class="lead">Votre commande est prête ! Sélectionnez les dates et les périodes qui vous conviennent. Nous vous confirmerons ensuite le rendez-vous par e-mail.</p>
+    <div id="loading" class="message">Vérification de votre lien privé…</div>
+    <div id="error" class="message error hidden" role="alert"></div>
+    <div id="confirmation" class="message success hidden"></div>
+    <form id="availability-form" class="hidden">
+      <h2>1. Choisissez une ou plusieurs dates</h2>
+      <p class="muted" style="text-align:left">Les samedis et dimanches sont proposés par défaut. Les dates exceptionnelles dépendent des disponibilités de l'atelier.</p>
+      <div id="dates" class="dates"></div>
+      <label class="comment-label" for="comment">2. Une précision pour la livraison ? <span style="font-weight:normal;color:var(--muted)">(facultatif)</span></label>
+      <textarea id="comment" maxlength="500" placeholder="Ex. : merci de prévenir 10 minutes avant de passer, sonner à la porte…"></textarea>
+      <span class="comment-hint"><span id="comment-count">0</span>/500 caractères</span>
+      <button id="submit" type="submit" class="primary">Envoyer mes disponibilités</button>
+      <p class="muted" style="font-size:.85rem">Ces disponibilités sont des propositions, pas encore un rendez-vous confirmé.</p>
+    </form>
+  </section>
+  <p class="footer">Saint-Witz & alentours · L'Atelier de Noël 3D</p>
+</main>
+<script>
+(() => {
+  const SUPABASE_URL = "https://sdqtgluhgywedjwgolei.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_zY7V5CoRa2mYRYhZdm8v7Q_lc5U1Lm_";
+  const ENDPOINT = SUPABASE_URL + "/functions/v1/order-workflow";
+  const PERIODS = [ ["morning", "Matin"], ["afternoon", "Après-midi"], ["evening", "Début de soirée"] ];
+  const token = new URLSearchParams(location.search).get("token") || "";
+  const $ = id => document.getElementById(id);
+  let confirmed = false;
+
+  async function callWorkflow(payload) {
+    const response = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Impossible de vérifier ou d'enregistrer vos disponibilités.");
+    return result;
+  }
+  function showError(message) { $("error").textContent = message; $("error").classList.remove("hidden"); }
+  function labelDate(key) {
+    return new Intl.DateTimeFormat("fr-FR", { timeZone:"Europe/Paris", weekday:"long", day:"numeric", month:"long", year:"numeric" }).format(new Date(key + "T12:00:00Z"));
+  }
+  function renderDates(dates, previous) {
+    const container = $("dates"); container.innerHTML = "";
+    if (!dates.length) { showError("Aucune date de livraison n'est actuellement ouverte. Contactez-nous pour convenir d'une exception."); return; }
+    const existing = new Set((previous || []).map(p => p.date + "|" + p.period));
+    dates.forEach((date, index) => {
+      const card = document.createElement("div"); card.className = "date-card";
+      const heading = document.createElement("h3"); heading.textContent = labelDate(date); card.appendChild(heading);
+      PERIODS.forEach(([key, label]) => {
+        const line = document.createElement("label"); line.className = "period";
+        const input = document.createElement("input"); input.type = "checkbox"; input.dataset.date = date; input.dataset.period = key;
+        input.checked = existing.has(date + "|" + key);
+        const caption = document.createElement("span"); caption.textContent = label;
+        line.append(input, caption); card.appendChild(line);
+      });
+      container.appendChild(card);
+    });
+  }
+  $("comment").addEventListener("input", () => { $("comment-count").textContent = String($("comment").value.length); });
+
+  (async function init() {
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      $("loading").classList.add("hidden"); showError("Ce lien de livraison est invalide. Utilisez le lien reçu par e-mail ou contactez l'atelier."); return;
+    }
+    try {
+      const result = await callWorkflow({ action: "validate_delivery_token", token });
+      $("loading").classList.add("hidden");
+      if (result.confirmed) {
+        confirmed = true;
+        $("confirmation").textContent = "Votre livraison est déjà confirmée pour le " + labelDate(result.confirmed_date) + " — " + ((PERIODS.find(p => p[0] === result.confirmed_period) || ["", result.confirmed_period])[1]) + ". Consultez l'e-mail de confirmation pour les détails.";
+        $("confirmation").classList.remove("hidden"); return;
+      }
+      const number = document.createElement("p"); number.className = "muted"; number.innerHTML = "Commande <strong class=\"order-number\"></strong>";
+      number.querySelector("strong").textContent = result.order_number || "";
+      $("dates").before(number);
+      renderDates(result.available_dates || [], result.existing_proposals || []);
+      $("comment").value = result.comment || "";
+      $("comment-count").textContent = String($("comment").value.length);
+      $("availability-form").classList.remove("hidden");
+      if (result.submitted) {
+        $("confirmation").textContent = "Vos disponibilités ont déjà été transmises. Vous pouvez les modifier tant que le rendez-vous n'est pas confirmé.";
+        $("confirmation").classList.remove("hidden");
+        $("submit").textContent = "Mettre à jour mes disponibilités";
+      }
+    } catch (error) {
+      $("loading").classList.add("hidden"); showError(error.message || "Une erreur est survenue.");
+    }
+  })();
+
+  $("availability-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    $("error").classList.add("hidden");
+    const proposals = [...$("dates").querySelectorAll("input[type=checkbox]:checked")].map(input => ({ date: input.dataset.date, period: input.dataset.period }));
+    if (!proposals.length) { showError("Sélectionnez au moins une date et une période."); return; }
+    const button = $("submit"); button.disabled = true; button.textContent = "Envoi en cours…";
+    try {
+      const result = await callWorkflow({ action: "submit_delivery_proposals", token, proposals, comment: $("comment").value.trim() });
+      $("confirmation").textContent = result.owner_email_sent === false
+        ? "Vos disponibilités sont enregistrées, mais la notification e-mail de l'atelier n'a pas été envoyée. L'atelier vérifiera sa messagerie de secours."
+        : "Merci ! Vos disponibilités ont bien été transmises à l'atelier. Vous recevrez un e-mail lorsque le rendez-vous sera confirmé.";
+      $("confirmation").classList.remove("hidden");
+    } catch (error) { showError(error.message || "Impossible d'envoyer vos disponibilités. Réessayez."); }
+    finally { button.disabled = false; button.textContent = "Mettre à jour mes disponibilités"; }
+  });
+})();
+</script>
+</body>
+</html>
