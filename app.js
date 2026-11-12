@@ -1172,7 +1172,7 @@ async function submitCustomQuote(event) {
     const message = $("custom-quote-message").value.trim(), file = $("custom-quote-pdf").files?.[0] || null;
     const errorBox = $("custom-quote-error"), button = $("custom-quote-submit"); hide(errorBox);
     if (price === "" || !Number.isFinite(Number(price)) || Number(price) < 0) { errorBox.textContent = "Indique un prix valide."; show(errorBox); return; }
-    if (file && (file.type !== "application/pdf" || file.size > 5 * 1024 * 1024)) { errorBox.textContent = "Choisis un PDF de 5 Mo maximum."; show(errorBox); return; }
+    if (file && (file.type !== "application/pdf" || file.size > 4 * 1024 * 1024)) { errorBox.textContent = "Choisis un PDF de 4 Mo maximum."; show(errorBox); return; }
     const { data: sessionData } = await supabaseClient.auth.getSession(), accessToken = sessionData?.session?.access_token;
     if (!accessToken) { errorBox.textContent = "Reconnecte-toi à l'administration."; show(errorBox); return; }
     const original = button.textContent; button.disabled = true; button.textContent = "Envoi du devis…";
