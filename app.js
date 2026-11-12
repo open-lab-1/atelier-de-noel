@@ -1141,93 +1141,90 @@ async function submitCustomRequest(event) {
 }
 
 const CUSTOM_REQUEST_STATUSES = {
-    new: "Nouvelle",
-    reviewing: "À étudier",
-    quote_sent: "Devis envoyé",
-    accepted: "Acceptée",
-    declined: "Refusée",
-    in_progress: "En fabrication",
-    completed: "Terminée"
+    new: "Nouvelle", reviewing: "À étudier", quote_sent: "Devis envoyé",
+    accepted: "Acceptée", declined: "Refusée", in_progress: "En fabrication", completed: "Terminée"
 };
-
-async function loadCustomRequests() {
-    const table = $("custom-requests-table");
-    if (!table) return;
-    table.innerHTML = '<tr><td colspan="8">Chargement des demandes…</td></tr>';
-
-    const { data: requests, error } = await supabaseClient
-        .from("custom_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    if (error) {
-        console.error("Chargement des demandes sur mesure impossible", error);
-        table.innerHTML = '<tr><td colspan="8">' + escapeHtml(error.message) + '</td></tr>';
-        return;
-    }
-    if (!requests?.length) {
-        table.innerHTML = '<tr><td colspan="8">Aucune demande pour le moment.</td></tr>';
-        return;
-    }
-
-    const allPaths = [...new Set(requests.flatMap(item => Array.isArray(item.photo_paths) ? item.photo_paths : []))];
-    const signedByPath = new Map();
-    if (allPaths.length) {
-        const { data: signed, error: signedError } = await supabaseClient
-            .storage.from("custom-request-photos").createSignedUrls(allPaths, 1800);
-        if (signedError) console.warn("Liens temporaires des photos indisponibles", signedError);
-        (signed || []).forEach(item => {
-            if (item.path && item.signedUrl) signedByPath.set(item.path, item.signedUrl);
-        });
-    }
-
-    table.innerHTML = requests.map(item => {
-        const date = new Date(item.created_at).toLocaleDateString("fr-FR");
-        const typeLabels = {
-            decoration: "Décoration",
-            replacement_part: "Pièce de remplacement",
-            personalized_object: "Objet personnalisé",
-            accessory: "Accessoire / support",
-            other: "Autre idée"
-        };
-        const type = typeLabels[item.request_type] || item.request_type;
-        const photoLinks = (Array.isArray(item.photo_paths) ? item.photo_paths : [])
-            .map((path, index) => {
-                const url = signedByPath.get(path);
-                return url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Photo ' + (index + 1) + '</a>' : "";
-            }).filter(Boolean).join(" · ") || "—";
-        const statusOptions = Object.entries(CUSTOM_REQUEST_STATUSES).map(([value, label]) =>
-            '<option value="' + value + '" ' + (item.status === value ? "selected" : "") + '>' + label + '</option>'
-        ).join("");
-
-        return '<tr>' +
-            '<td><strong>' + escapeHtml(item.request_number) + '</strong><br><small>' + escapeHtml(date) + '</small></td>' +
-            '<td><strong>' + escapeHtml(item.customer_name) + '</strong><br><a href="mailto:' + escapeHtml(item.email) + '">' + escapeHtml(item.email) + '</a></td>' +
-            '<td><strong>' + escapeHtml(type) + '</strong><details class="custom-description-details"><summary>Lire la description</summary><p>' + escapeHtml(item.description) + '</p></details></td>' +
-            '<td>' + escapeHtml(item.dimensions || "—") + '</td>' +
-            '<td>' + escapeHtml(item.quantity) + '</td>' +
-            '<td>' + escapeHtml(item.budget || "—") + '</td>' +
-            '<td>' + photoLinks + '</td>' +
-            '<td><select class="custom-request-status" data-custom-request-id="' + escapeHtml(item.id) + '" aria-label="État de la demande ' + escapeHtml(item.request_number) + '">' + statusOptions + '</select></td>' +
-            '</tr>';
-    }).join("");
-
-    table.querySelectorAll("[data-custom-request-id]").forEach(select => {
-        select.addEventListener("change", () => updateCustomRequestStatus(select.dataset.customRequestId, select.value));
+let CUSTOM_REQUEST_CACHE = new Map();
+function openCustomQuoteModal(requestId) {
+    const item = CUSTOM_REQUEST_CACHE.get(requestId);
+    if (!item) return alert("Demande introuvable. Actualise la liste.");
+    $("custom-quote-request-id").value = requestId;
+    $("custom-quote-heading").textContent = item.status === "quote_sent" ? "Renvoyer le devis" : "Envoyer le devis au client";
+    $("custom-quote-customer").textContent = item.customer_name + " · " + item.request_number;
+    $("custom-quote-price").value = item.quote_price ?? "";
+    $("custom-quote-message").value = item.quote_message || "";
+    $("custom-quote-pdf").value = "";
+    $("custom-quote-pdf-note").textContent = item.quote_pdf_path ? "Un PDF est déjà enregistré : laisse ce champ vide pour le réutiliser." : "PDF facultatif · 5 Mo maximum";
+    $("custom-quote-error").textContent = ""; hide("custom-quote-error"); show("custom-quote-modal");
+}
+function closeCustomQuoteModal() { hide("custom-quote-modal"); }
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => { const value = String(reader.result || ""); const comma = value.indexOf(","); comma < 0 ? reject(new Error("Impossible de lire le PDF.")) : resolve(value.slice(comma + 1)); };
+        reader.onerror = () => reject(new Error("Impossible de lire le PDF."));
+        reader.readAsDataURL(file);
     });
 }
-
+async function submitCustomQuote(event) {
+    event.preventDefault();
+    const requestId = $("custom-quote-request-id").value, price = $("custom-quote-price").value;
+    const message = $("custom-quote-message").value.trim(), file = $("custom-quote-pdf").files?.[0] || null;
+    const errorBox = $("custom-quote-error"), button = $("custom-quote-submit"); hide(errorBox);
+    if (price === "" || !Number.isFinite(Number(price)) || Number(price) < 0) { errorBox.textContent = "Indique un prix valide."; show(errorBox); return; }
+    if (file && (file.type !== "application/pdf" || file.size > 5 * 1024 * 1024)) { errorBox.textContent = "Choisis un PDF de 5 Mo maximum."; show(errorBox); return; }
+    const { data: sessionData } = await supabaseClient.auth.getSession(), accessToken = sessionData?.session?.access_token;
+    if (!accessToken) { errorBox.textContent = "Reconnecte-toi à l'administration."; show(errorBox); return; }
+    const original = button.textContent; button.disabled = true; button.textContent = "Envoi du devis…";
+    try {
+        const pdf = file ? { filename: file.name, mime_type: file.type, data_base64: await fileToBase64(file) } : null;
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/order-workflow`, {
+            method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${accessToken}` },
+            body: JSON.stringify({ action: "admin_send_custom_quote", request_id: requestId, price: Number(price), message, pdf })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) throw new Error(result.error || "Le devis n'a pas pu être envoyé.");
+        closeCustomQuoteModal();
+        alert(result.status_updated ? "Devis envoyé au client ! Le statut est passé à « Devis envoyé »." : "E-mail envoyé, mais le statut n'a pas pu être actualisé.");
+        await loadCustomRequests();
+    } catch (error) { errorBox.textContent = error instanceof Error ? error.message : "Erreur pendant l'envoi du devis."; show(errorBox); }
+    finally { button.disabled = false; button.textContent = original; }
+}
+async function loadCustomRequests() {
+    const table = $("custom-requests-table"); if (!table) return;
+    table.innerHTML = '<tr><td colspan="9">Chargement des demandes…</td></tr>';
+    const { data: requests, error } = await supabaseClient.from("custom_requests").select("*").order("created_at", { ascending: false });
+    if (error) { console.error(error); table.innerHTML = '<tr><td colspan="9">' + escapeHtml(error.message) + '</td></tr>'; return; }
+    if (!requests?.length) { table.innerHTML = '<tr><td colspan="9">Aucune demande pour le moment.</td></tr>'; return; }
+    CUSTOM_REQUEST_CACHE = new Map(requests.map(item => [item.id, item]));
+    const allPaths = [...new Set(requests.flatMap(item => Array.isArray(item.photo_paths) ? item.photo_paths : []))], signedByPath = new Map();
+    if (allPaths.length) {
+        const { data: signed, error: signedError } = await supabaseClient.storage.from("custom-request-photos").createSignedUrls(allPaths, 1800);
+        if (signedError) console.warn("Liens temporaires des photos indisponibles", signedError);
+        (signed || []).forEach(item => { if (item.path && item.signedUrl) signedByPath.set(item.path, item.signedUrl); });
+    }
+    table.innerHTML = requests.map(item => {
+        const date = new Date(item.created_at).toLocaleDateString("fr-FR");
+        const labels = { decoration: "Décoration", replacement_part: "Pièce de remplacement", personalized_object: "Objet personnalisé", accessory: "Accessoire / support", other: "Autre idée" };
+        const photos = (Array.isArray(item.photo_paths) ? item.photo_paths : []).map((path, i) => {
+            const url = signedByPath.get(path); return url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Photo ' + (i + 1) + '</a>' : "";
+        }).filter(Boolean).join(" · ") || "—";
+        const statuses = Object.entries(CUSTOM_REQUEST_STATUSES).map(([value, label]) => '<option value="' + value + '" ' + (item.status === value ? "selected" : "") + '>' + label + '</option>').join("");
+        const quoteButton = '<button type="button" class="btn small primary" data-custom-quote-id="' + escapeHtml(item.id) + '">' + (item.status === "quote_sent" ? "Renvoyer le devis" : "Envoyer le devis") + '</button>';
+        return '<tr><td><strong>' + escapeHtml(item.request_number) + '</strong><br><small>' + escapeHtml(date) + '</small></td>' +
+          '<td><strong>' + escapeHtml(item.customer_name) + '</strong><br><a href="mailto:' + escapeHtml(item.email) + '">' + escapeHtml(item.email) + '</a></td>' +
+          '<td><strong>' + escapeHtml(labels[item.request_type] || item.request_type) + '</strong><details class="custom-description-details"><summary>Lire la description</summary><p>' + escapeHtml(item.description) + '</p></details></td>' +
+          '<td>' + escapeHtml(item.dimensions || "—") + '</td><td>' + escapeHtml(item.quantity) + '</td><td>' + escapeHtml(item.budget || "—") + '</td><td>' + photos + '</td>' +
+          '<td><select class="custom-request-status" data-custom-request-id="' + escapeHtml(item.id) + '">' + statuses + '</select></td>' +
+          '<td>' + quoteButton + (item.quote_price != null ? '<br><small>Dernier devis : ' + money(item.quote_price) + '</small>' : '') + '</td></tr>';
+    }).join("");
+    table.querySelectorAll("[data-custom-request-id]").forEach(select => select.addEventListener("change", () => updateCustomRequestStatus(select.dataset.customRequestId, select.value)));
+    table.querySelectorAll("[data-custom-quote-id]").forEach(button => button.addEventListener("click", () => openCustomQuoteModal(button.dataset.customQuoteId)));
+}
 async function updateCustomRequestStatus(requestId, status) {
     if (!Object.prototype.hasOwnProperty.call(CUSTOM_REQUEST_STATUSES, status)) return;
-    const { error } = await supabaseClient.from("custom_requests")
-        .update({ status: status, updated_at: new Date().toISOString() })
-        .eq("id", requestId);
-    if (error) {
-        console.error("Mise à jour de la demande impossible", error);
-        alert("Impossible de modifier l'état de cette demande :\n" + error.message);
-        await loadCustomRequests();
-        return;
-    }
+    const { error } = await supabaseClient.from("custom_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", requestId);
+    if (error) { console.error(error); alert("Impossible de modifier l'état de cette demande :\n" + error.message); await loadCustomRequests(); return; }
     await loadCustomRequests();
 }
 
@@ -2235,6 +2232,9 @@ document.addEventListener(
         }
 
 
+        const quoteForm = $("custom-quote-form");
+        if (quoteForm) quoteForm.addEventListener("submit", submitCustomQuote);
+
         const exceptionForm = $("delivery-exception-form");
         if (exceptionForm) exceptionForm.addEventListener("submit", saveDeliveryException);
         const exceptionDate = $("delivery-exception-date");
@@ -2280,6 +2280,8 @@ window.loadOrders =
     loadOrders;
 
 window.loadCustomRequests = loadCustomRequests;
+window.openCustomQuoteModal = openCustomQuoteModal;
+window.closeCustomQuoteModal = closeCustomQuoteModal;
 
 window.changeOrderStatus =
     changeOrderStatus;
