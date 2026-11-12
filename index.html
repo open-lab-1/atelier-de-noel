@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div id="snow"></div>
@@ -22,6 +22,7 @@
     <button onclick="showPage('home')">Accueil</button>
     <button onclick="showPage('catalog')">Catalogue</button>
     <button onclick="showPage('order')">Commander</button>
+    <button onclick="showPage('custom')">Pièces sur mesure</button>
     <button onclick="showPage('tracking')">Suivre ma commande</button>
   </nav>
 </header>
@@ -36,6 +37,7 @@
         <div class="hero-actions">
           <button class="btn primary" onclick="showPage('catalog')">Découvrir les modèles</button>
           <button class="btn secondary" onclick="showPage('order')">Passer commande</button>
+          <button class="btn ghost" onclick="showPage('custom')">Une pièce sur mesure ?</button>
         </div>
       </div>
       <div class="hero-art">
@@ -90,6 +92,86 @@
     <div id="order-success" class="success-card hidden"><div class="success-icon">✓</div><h2>Commande reçue !</h2><p>Votre numéro de commande est</p><strong id="success-number" class="order-number"></strong><p>Statut actuel : <strong>En attente de passage</strong></p><button class="btn primary" onclick="showPage('tracking')">Suivre ma commande</button></div>
   </section>
 
+
+  <section id="custom" class="page custom-page">
+    <div class="section-heading">
+      <p class="eyebrow">CRÉATION PERSONNALISÉE</p>
+      <h1>Pièces sur mesure</h1>
+      <p>Vous avez une idée ? Nous lui donnons forme. Décrivez-nous votre projet et nous vous recontacterons pour échanger avec vous.</p>
+    </div>
+
+    <div class="custom-request-banner" id="custom-request-banner">
+      <img id="custom-request-banner-image" class="hidden" alt="Illustration des créations sur mesure">
+      <div id="custom-request-banner-placeholder" class="custom-request-banner-placeholder">
+        <span class="custom-banner-star">✦</span>
+        <strong>Une idée à concrétiser ?</strong>
+        <span>Parlons de votre projet.</span>
+      </div>
+    </div>
+
+    <form id="custom-request-form" class="card custom-request-form">
+      <div class="step-title"><span>1</span> Vos coordonnées</div>
+      <div class="form-grid">
+        <label class="wide">Nom et prénom<input id="custom-customer-name" type="text" maxlength="160" autocomplete="name" required placeholder="Votre nom et prénom"></label>
+        <label class="wide">Adresse e-mail<input id="custom-email" type="email" maxlength="254" autocomplete="email" required placeholder="vous@exemple.fr"></label>
+      </div>
+
+      <div class="step-title"><span>2</span> Votre projet</div>
+      <div class="form-grid">
+        <label class="wide">Type de pièce souhaitée
+          <select id="custom-request-type" required>
+            <option value="">Sélectionnez un type…</option>
+            <option value="decoration">Décoration</option>
+            <option value="replacement_part">Pièce de remplacement</option>
+            <option value="personalized_object">Objet personnalisé</option>
+            <option value="accessory">Accessoire / support</option>
+            <option value="other">Autre idée</option>
+          </select>
+        </label>
+        <label class="wide">Décrivez votre projet
+          <textarea id="custom-description" rows="5" minlength="10" maxlength="3000" required placeholder="Expliquez ce que vous souhaitez fabriquer, le style recherché, l'utilisation prévue…"></textarea>
+          <small>Entre 10 et 3 000 caractères.</small>
+        </label>
+        <label>Dimensions approximatives <small>(facultatif)</small>
+          <input id="custom-dimensions" type="text" maxlength="180" placeholder="Ex. : 4 à 5 cm">
+        </label>
+        <label>Quantité souhaitée
+          <input id="custom-quantity" type="number" min="1" max="100" step="1" value="1" required>
+        </label>
+        <label class="wide">Budget indicatif <small>(facultatif)</small>
+          <input id="custom-budget" type="text" maxlength="120" placeholder="Ex. : 20 à 30 €">
+        </label>
+      </div>
+
+      <div class="step-title"><span>3</span> Photos de référence <small>(facultatif)</small></div>
+      <p class="muted">Ajoutez jusqu'à 4 photos pour nous aider à comprendre votre idée. Formats acceptés : JPG, PNG ou WEBP (1 Mo maximum par photo).</p>
+      <label class="custom-upload-area" for="custom-photos">
+        <span class="custom-upload-icon">＋</span>
+        <strong>Ajouter une ou plusieurs photos</strong>
+        <span class="muted">Cliquez ici pour choisir vos images</span>
+      </label>
+      <input id="custom-photos" class="custom-photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      <div id="custom-photo-list" class="custom-photo-list" aria-live="polite"></div>
+
+      <div class="custom-honeypot" aria-hidden="true">
+        <label>Ne pas remplir<input id="custom-website" type="text" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <div id="custom-request-error" class="message error hidden" role="alert"></div>
+      <button id="custom-request-submit" class="btn primary full" type="submit">Envoyer ma demande</button>
+      <p class="custom-privacy-note">Votre demande ne vaut pas commande. Nous vous répondrons par e-mail avec une proposition adaptée.</p>
+    </form>
+
+    <div id="custom-request-success" class="success-card hidden" aria-live="polite">
+      <div class="success-icon">✓</div>
+      <h2>Votre demande est bien partie !</h2>
+      <p>Votre référence de demande :</p>
+      <strong id="custom-request-reference" class="order-number"></strong>
+      <p>Nous allons étudier votre projet et vous recontacter à l'adresse e-mail indiquée.</p>
+      <button class="btn primary" type="button" onclick="showPage('home')">Retour à l'accueil</button>
+    </div>
+  </section>
+
   <section id="tracking" class="page"><div class="section-heading"><p class="eyebrow">SUIVI</p><h1>Suivez votre commande</h1><p>Entrez votre numéro, par exemple <strong>#SW-042</strong>.</p></div><div class="tracking-card card"><div class="tracking-search"><input id="tracking-number" placeholder="#SW-042" autocomplete="off"><button class="btn primary" onclick="trackOrder()">Rechercher</button></div><div id="tracking-loading" class="muted hidden">Recherche...</div><div id="tracking-error" class="message error hidden"></div><div id="tracking-result" class="tracking-result hidden"><div id="tracking-icon" class="status-icon"></div><p class="eyebrow">COMMANDE <span id="tracking-order-number"></span></p><h2 id="tracking-title"></h2><p id="tracking-description"></p></div></div></section>
 
   <section id="admin-login" class="page"><div class="auth-card card"><p class="eyebrow">ESPACE PRIVÉ</p><h1>Administration</h1><p class="muted">Connectez-vous avec le compte administrateur créé dans Supabase Auth.</p><label>E-mail<input id="admin-email" type="email" autocomplete="email"></label><label>Mot de passe<input id="admin-password" type="password" autocomplete="current-password"></label><button class="btn primary full" onclick="adminLogin()">Se connecter</button><div id="admin-login-error" class="message error hidden"></div></div></section>
@@ -107,7 +189,19 @@
       </form>
       <div id="delivery-exceptions-list" class="delivery-exceptions-list"><p class="muted">Les exceptions apparaîtront ici.</p></div>
     </section>
-  </section>
+      <section class="card custom-requests-admin-card">
+      <div class="table-top">
+        <div><h2>Demandes de pièces sur mesure</h2><p class="muted">Les demandes, photos privées et coordonnées sont visibles uniquement par les administrateurs.</p></div>
+        <button class="btn ghost" type="button" onclick="loadCustomRequests()">Actualiser</button>
+      </div>
+      <div class="table-scroll">
+        <table class="custom-requests-table">
+          <thead><tr><th>Référence / date</th><th>Client / e-mail</th><th>Type / description</th><th>Dimensions</th><th>Qté</th><th>Budget</th><th>Photos</th><th>État</th></tr></thead>
+          <tbody id="custom-requests-table"><tr><td colspan="8">Les demandes apparaîtront ici.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+</section>
 </main>
 
 <div id="manual-modal" class="modal hidden"><div class="modal-box card"><button class="modal-close" onclick="closeManualOrder()">×</button><p class="eyebrow">ADMIN</p><h2>Créer une commande manuelle</h2><p class="muted">Pratique pour une commande prise directement lors du porte-à-porte.</p><form id="manual-form"><div class="form-grid"><label>Prénom<input id="manual-first-name" required></label><label>Nom<input id="manual-last-name" required></label><label class="wide">E-mail<input id="manual-email" type="email" required></label><label>Téléphone<input id="manual-phone"></label><label>Rue et numéro<input id="manual-street" required></label><label>Ville<input id="manual-city" value="Saint-Witz" required></label><label class="wide">Complément<input id="manual-complement"></label></div>
@@ -115,6 +209,6 @@
   <div class="option-block"><label>Quantité<input id="manual-quantity" type="number" min="1" max="50" value="1"></label></div><div id="manual-price" class="manual-price"></div><button class="btn primary full" type="submit">Créer la commande</button></form></div></div>
 
 <footer><strong>L'Atelier de Noël 3D</strong><span>Saint-Witz & alentours</span></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=8"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=9"></script>
 </body>
 </html>
