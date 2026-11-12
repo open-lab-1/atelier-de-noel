@@ -1093,3 +1093,12 @@ footer {
   .custom-request-form .form-grid { grid-template-columns:1fr; }
   .custom-request-form .form-grid .wide { grid-column:auto; }
 }
+
+/* Devis pièces sur mesure */
+.custom-quote-modal-box { width: min(620px, calc(100vw - 28px)); max-height: 90vh; overflow-y: auto; }
+.custom-quote-modal-box form { display: grid; gap: 14px; }
+.custom-quote-modal-box label { display: grid; gap: 6px; font-weight: 600; }
+.custom-quote-modal-box input, .custom-quote-modal-box textarea { width: 100%; box-sizing: border-box; }
+.custom-quote-modal-box small { font-weight: 400; }
+.custom-quote-modal-box .modal-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.custom-quote-modal-box .small { font-size: .86rem; }
