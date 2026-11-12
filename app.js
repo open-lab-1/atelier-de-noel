@@ -989,6 +989,249 @@ async function trackOrder() {
 }
 
 
+
+/* =========================================================
+   DEMANDES DE PIÈCES SUR MESURE
+   ========================================================= */
+
+async function loadCustomRequestBanner() {
+    const image = $("custom-request-banner-image");
+    const placeholder = $("custom-request-banner-placeholder");
+    if (!image || !placeholder) return;
+
+    const { data, error } = await supabaseClient
+        .from("site_settings")
+        .select("setting_value")
+        .eq("setting_key", "custom_request_banner_url")
+        .maybeSingle();
+
+    const url = !error && typeof data?.setting_value === "string" ? data.setting_value.trim() : "";
+    if (!url) {
+        hide(image);
+        show(placeholder);
+        return;
+    }
+
+    image.onload = () => { show(image); hide(placeholder); };
+    image.onerror = () => {
+        hide(image);
+        show(placeholder);
+        console.warn("Image de bannière non chargée : vérifie son URL dans site_settings.");
+    };
+    image.src = url;
+}
+
+function customFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const value = String(reader.result || "");
+            const comma = value.indexOf(",");
+            if (comma < 0) return reject(new Error("Impossible de lire une photo."));
+            resolve(value.slice(comma + 1));
+        };
+        reader.onerror = () => reject(new Error("Impossible de lire une photo."));
+        reader.readAsDataURL(file);
+    });
+}
+
+function refreshCustomPhotoList() {
+    const input = $("custom-photos");
+    const list = $("custom-photo-list");
+    const errorBox = $("custom-request-error");
+    if (!input || !list) return;
+    const files = Array.from(input.files || []);
+
+    if (files.length > 4) {
+        input.value = "";
+        list.innerHTML = "";
+        if (errorBox) {
+            errorBox.textContent = "Vous pouvez joindre jusqu'à 4 photos.";
+            show(errorBox);
+        }
+        return;
+    }
+
+    const invalid = files.find(file =>
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 1048576
+    );
+    if (invalid) {
+        input.value = "";
+        list.innerHTML = "";
+        if (errorBox) {
+            errorBox.textContent = "Chaque photo doit être au format JPG, PNG ou WEBP et faire 1 Mo maximum.";
+            show(errorBox);
+        }
+        return;
+    }
+
+    if (errorBox) hide(errorBox);
+    list.innerHTML = files.map(file =>
+        '<span class="custom-photo-chip">' + escapeHtml(file.name) + ' · ' + (file.size / 1024).toFixed(0) + ' Ko</span>'
+    ).join("");
+}
+
+async function submitCustomRequest(event) {
+    event.preventDefault();
+    const form = $("custom-request-form");
+    const errorBox = $("custom-request-error");
+    const button = $("custom-request-submit");
+    if (!form || !errorBox || !button) return;
+
+    hide(errorBox);
+    const files = Array.from($("custom-photos")?.files || []);
+    const invalid = files.find(file =>
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 1048576
+    );
+    if (files.length > 4 || invalid) {
+        errorBox.textContent = files.length > 4
+            ? "Vous pouvez joindre jusqu'à 4 photos."
+            : "Chaque photo doit être au format JPG, PNG ou WEBP et faire 1 Mo maximum.";
+        show(errorBox);
+        return;
+    }
+
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = "Envoi de votre demande…";
+
+    try {
+        const photos = await Promise.all(files.map(async file => ({
+            mime_type: file.type,
+            data_base64: await customFileToBase64(file)
+        })));
+
+        const payload = {
+            action: "submit_custom_request",
+            customer_name: $("custom-customer-name").value.trim(),
+            email: $("custom-email").value.trim(),
+            request_type: $("custom-request-type").value,
+            description: $("custom-description").value.trim(),
+            dimensions: $("custom-dimensions").value.trim(),
+            quantity: Number($("custom-quantity").value),
+            budget: $("custom-budget").value.trim(),
+            website: $("custom-website").value.trim(),
+            photos: photos
+        };
+
+        const response = await fetch(SUPABASE_URL + "/functions/v1/order-workflow", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_KEY,
+                "Authorization": "Bearer " + SUPABASE_KEY
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) throw new Error(result.error || "Impossible d'envoyer votre demande. Réessayez.");
+
+        $("custom-request-reference").textContent = result.request_number || "Demande reçue";
+        hide(form);
+        show("custom-request-success");
+        form.reset();
+        if ($("custom-photo-list")) $("custom-photo-list").innerHTML = "";
+    } catch (error) {
+        errorBox.textContent = error instanceof Error ? error.message : "Une erreur est survenue. Réessayez.";
+        show(errorBox);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+    }
+}
+
+const CUSTOM_REQUEST_STATUSES = {
+    new: "Nouvelle",
+    reviewing: "À étudier",
+    quote_sent: "Devis envoyé",
+    accepted: "Acceptée",
+    declined: "Refusée",
+    in_progress: "En fabrication",
+    completed: "Terminée"
+};
+
+async function loadCustomRequests() {
+    const table = $("custom-requests-table");
+    if (!table) return;
+    table.innerHTML = '<tr><td colspan="8">Chargement des demandes…</td></tr>';
+
+    const { data: requests, error } = await supabaseClient
+        .from("custom_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Chargement des demandes sur mesure impossible", error);
+        table.innerHTML = '<tr><td colspan="8">' + escapeHtml(error.message) + '</td></tr>';
+        return;
+    }
+    if (!requests?.length) {
+        table.innerHTML = '<tr><td colspan="8">Aucune demande pour le moment.</td></tr>';
+        return;
+    }
+
+    const allPaths = [...new Set(requests.flatMap(item => Array.isArray(item.photo_paths) ? item.photo_paths : []))];
+    const signedByPath = new Map();
+    if (allPaths.length) {
+        const { data: signed, error: signedError } = await supabaseClient
+            .storage.from("custom-request-photos").createSignedUrls(allPaths, 1800);
+        if (signedError) console.warn("Liens temporaires des photos indisponibles", signedError);
+        (signed || []).forEach(item => {
+            if (item.path && item.signedUrl) signedByPath.set(item.path, item.signedUrl);
+        });
+    }
+
+    table.innerHTML = requests.map(item => {
+        const date = new Date(item.created_at).toLocaleDateString("fr-FR");
+        const typeLabels = {
+            decoration: "Décoration",
+            replacement_part: "Pièce de remplacement",
+            personalized_object: "Objet personnalisé",
+            accessory: "Accessoire / support",
+            other: "Autre idée"
+        };
+        const type = typeLabels[item.request_type] || item.request_type;
+        const photoLinks = (Array.isArray(item.photo_paths) ? item.photo_paths : [])
+            .map((path, index) => {
+                const url = signedByPath.get(path);
+                return url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Photo ' + (index + 1) + '</a>' : "";
+            }).filter(Boolean).join(" · ") || "—";
+        const statusOptions = Object.entries(CUSTOM_REQUEST_STATUSES).map(([value, label]) =>
+            '<option value="' + value + '" ' + (item.status === value ? "selected" : "") + '>' + label + '</option>'
+        ).join("");
+
+        return '<tr>' +
+            '<td><strong>' + escapeHtml(item.request_number) + '</strong><br><small>' + escapeHtml(date) + '</small></td>' +
+            '<td><strong>' + escapeHtml(item.customer_name) + '</strong><br><a href="mailto:' + escapeHtml(item.email) + '">' + escapeHtml(item.email) + '</a></td>' +
+            '<td><strong>' + escapeHtml(type) + '</strong><details class="custom-description-details"><summary>Lire la description</summary><p>' + escapeHtml(item.description) + '</p></details></td>' +
+            '<td>' + escapeHtml(item.dimensions || "—") + '</td>' +
+            '<td>' + escapeHtml(item.quantity) + '</td>' +
+            '<td>' + escapeHtml(item.budget || "—") + '</td>' +
+            '<td>' + photoLinks + '</td>' +
+            '<td><select class="custom-request-status" data-custom-request-id="' + escapeHtml(item.id) + '" aria-label="État de la demande ' + escapeHtml(item.request_number) + '">' + statusOptions + '</select></td>' +
+            '</tr>';
+    }).join("");
+
+    table.querySelectorAll("[data-custom-request-id]").forEach(select => {
+        select.addEventListener("change", () => updateCustomRequestStatus(select.dataset.customRequestId, select.value));
+    });
+}
+
+async function updateCustomRequestStatus(requestId, status) {
+    if (!Object.prototype.hasOwnProperty.call(CUSTOM_REQUEST_STATUSES, status)) return;
+    const { error } = await supabaseClient.from("custom_requests")
+        .update({ status: status, updated_at: new Date().toISOString() })
+        .eq("id", requestId);
+    if (error) {
+        console.error("Mise à jour de la demande impossible", error);
+        alert("Impossible de modifier l'état de cette demande :\n" + error.message);
+        await loadCustomRequests();
+        return;
+    }
+    await loadCustomRequests();
+}
+
+
 /* =========================================================
    18. ADMIN LOGIN
    ========================================================= */
@@ -1042,6 +1285,7 @@ async function adminLogin() {
     showPage("admin");
 
     await loadOrders();
+    await loadCustomRequests();
 }
 
 
@@ -1857,11 +2101,17 @@ document.addEventListener(
         */
 
         await loadProducts();
+        await loadCustomRequestBanner();
 
 
         /*
            Formulaire commande
         */
+
+        const customRequestForm = $("custom-request-form");
+        if (customRequestForm) customRequestForm.addEventListener("submit", submitCustomRequest);
+        const customPhotosInput = $("custom-photos");
+        if (customPhotosInput) customPhotosInput.addEventListener("change", refreshCustomPhotoList);
 
         const orderForm =
             $("order-form");
@@ -2028,6 +2278,8 @@ window.logoutAdmin =
 
 window.loadOrders =
     loadOrders;
+
+window.loadCustomRequests = loadCustomRequests;
 
 window.changeOrderStatus =
     changeOrderStatus;
